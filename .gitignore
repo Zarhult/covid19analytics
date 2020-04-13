@@ -1,0 +1,15 @@
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Executable
+qttest
+
+# Others
+.ccls-cache/
+Debug/
+compile_commands.json
+qttest_autogen/
+
