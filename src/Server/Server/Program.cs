@@ -14,6 +14,7 @@ namespace Server
         [STAThread]
         static void Main()
         {
+            List<COVIDDataPoint> data = Parser.ParseCSV("D:\\data\\covid_19_data.csv");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
