@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Text.RegularExpressions;
 
 // Ignoring observation date and serial number
 
@@ -10,12 +10,14 @@ namespace Server
 {
     public class COVIDDataPoint
     {
-        public String city = ""; // For some data points this is left blank and will remain an empty string
+        // Todo: convert date string to DateTime
+        public int age = 0;
+        public String gender = "";
+        public String city = "";
+        public String province = "";
         public String country = "";
-        public String lastUpdate = "";
-        public double confirmed = 0;
-        public double dead = 0;
-        public double recovered = 0;
+        public String date_confirmation = "";
+        public String outcome = "";
     }
 
     public class Parser
@@ -32,29 +34,67 @@ namespace Server
                 while (!sr.EndOfStream)
                 {
                     String line = sr.ReadLine();
-                    String[] values;
 
-                    values = line.Split(',');
+                    Regex matchCommas = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))"); // Matches all commas in data that aren't inside quotes
+                    String[] values = matchCommas.Split(line);
 
-                    COVIDDataPoint point = new COVIDDataPoint();
-
-                    int quoteOffset = 0; // Adjust indices accordingly for city data like "Los Angeles, CA"
-                    if (line.Contains("\""))
+                    if (values.Length >= 45) // Ignore incomplete data points
                     {
-                        quoteOffset = 1;
-                        point.city = values[2] + ", " + values[3];
-                    }
-                    else
-                    {
-                        point.city = values[2];
-                    }
-                    point.country = values[3 + quoteOffset];
-                    point.lastUpdate = values[4 + quoteOffset];
-                    point.confirmed = double.Parse(values[5 + quoteOffset], CultureInfo.InvariantCulture);
-                    point.dead = double.Parse(values[6 + quoteOffset], CultureInfo.InvariantCulture);
-                    point.recovered = double.Parse(values[7] + quoteOffset, CultureInfo.InvariantCulture);
+                        COVIDDataPoint point = new COVIDDataPoint();
 
-                    data.Add(point);
+                        for (int i = 0; i < values.Length; ++i)
+                        {
+                            values[i] = values[i].TrimStart('"'); // Remove quotes from data elements if present
+                            values[i] = values[i].TrimEnd('"');
+                        }
+
+                        int[] dataIndices = { 1, 2, 3, 4, 5, 12, 23 }; // Indices we care about
+                        foreach (int index in dataIndices)
+                        {
+                            String val = values[index];
+                            if (val != "") // Ignore empty data
+                            {
+                                switch(index)
+                                {
+                                    case 1:
+                                        bool success = Int32.TryParse(val, out int result);
+                                        if (success)
+                                        {
+                                            point.age = result;
+                                        }
+                                        break;
+
+                                    case 2:
+                                        point.gender = val;
+                                        break;
+
+                                    case 3:
+                                        point.city = val;
+                                        break;
+
+                                    case 4:
+                                        point.province = val;
+                                        break;
+
+                                    case 5:
+                                        point.country = val;
+                                        break;
+
+                                    case 12:
+                                        point.date_confirmation = val;
+                                        break;
+
+                                    case 23:
+                                        point.outcome = val;
+                                        break;
+                                }
+                            }
+                        }
+
+                        //System.Diagnostics.Debug.WriteLine(point.age + point.gender + point.city + point.province + point.country + point.date_confirmation + point.outcome);
+
+                        data.Add(point);
+                    }
                 }
             }
 

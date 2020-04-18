@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Server
 {
@@ -14,23 +15,10 @@ namespace Server
         [STAThread]
         static void Main()
         {
-            List<COVIDDataPoint> data = Parser.ParseCSV("<FILENAME>");
+            List<COVIDDataPoint> data = Parser.ParseCSV("..\\..\\COVID19_open_line_list.csv"); // Go up a couple directories to the data file
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
-
-            // For testing the parser
-            /*
-            foreach(COVIDDataPoint point in data)
-            {
-                System.Diagnostics.Debug.WriteLine(point.city);
-                System.Diagnostics.Debug.WriteLine(point.country);
-                System.Diagnostics.Debug.WriteLine(point.lastUpdate);
-                System.Diagnostics.Debug.WriteLine(point.confirmed);
-                System.Diagnostics.Debug.WriteLine(point.dead);
-                System.Diagnostics.Debug.WriteLine(point.recovered);
-            }
-            */
         }
     }
 }
