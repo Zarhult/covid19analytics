@@ -4,20 +4,16 @@ using System.Text;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-// Ignoring observation date and serial number
-
 namespace Server
 {
     public class COVIDDataPoint
     {
-        // Todo: convert date string to DateTime
-        public int age = 0;
-        public String gender = "";
-        public String city = "";
+        public DateTime obsDate;
         public String province = "";
         public String country = "";
-        public String date_confirmation = "";
-        public String outcome = "";
+        public double confirmed = 0.0;
+        public double dead = 0.0;
+        public double recovered = 0.0;
     }
 
     public class Parser
@@ -38,63 +34,58 @@ namespace Server
                     Regex matchCommas = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))"); // Matches all commas in data that aren't inside quotes
                     String[] values = matchCommas.Split(line);
 
-                    if (values.Length >= 45) // Ignore incomplete data points
+                    COVIDDataPoint point = new COVIDDataPoint();
+
+                    for (int i = 0; i < values.Length; ++i)
                     {
-                        COVIDDataPoint point = new COVIDDataPoint();
+                        values[i] = values[i].TrimStart('"'); // Remove quotes from data elements if present
+                        values[i] = values[i].TrimEnd('"');
+                    }
 
-                        for (int i = 0; i < values.Length; ++i)
+                    int[] dataIndices = { 1, 2, 3, 5, 6, 7 }; // Indices we care about
+                    foreach (int index in dataIndices)
+                    {
+                        String val = values[index];
+                        if (val != "") // Ignore empty data
                         {
-                            values[i] = values[i].TrimStart('"'); // Remove quotes from data elements if present
-                            values[i] = values[i].TrimEnd('"');
-                        }
-
-                        int[] dataIndices = { 1, 2, 3, 4, 5, 12, 23 }; // Indices we care about
-                        foreach (int index in dataIndices)
-                        {
-                            String val = values[index];
-                            if (val != "") // Ignore empty data
+                            switch(index)
                             {
-                                switch(index)
-                                {
-                                    case 1:
-                                        bool success = Int32.TryParse(val, out int result);
-                                        if (success)
-                                        {
-                                            point.age = result;
-                                        }
-                                        break;
+                                case 1:
+                                    point.obsDate = DateTime.Parse(val);
+                                    break;
 
-                                    case 2:
-                                        point.gender = val;
-                                        break;
+                                case 2:
+                                    point.province = val;
+                                    break;
 
-                                    case 3:
-                                        point.city = val;
-                                        break;
+                                case 3:
+                                    point.country = val;
+                                    break;
 
-                                    case 4:
-                                        point.province = val;
-                                        break;
+                                case 5:
+                                    if (double.TryParse(val, out double result1))
+                                    {
+                                        point.confirmed = result1;
+                                    }
+                                    break;
 
-                                    case 5:
-                                        point.country = val;
-                                        break;
+                                case 6:
+                                    if (double.TryParse(val, out double result2))
+                                    {
+                                        point.dead = result2;
+                                    }
+                                    break;
 
-                                    case 12:
-                                        point.date_confirmation = val;
-                                        break;
-
-                                    case 23:
-                                        point.outcome = val;
-                                        break;
-                                }
+                                case 7:
+                                    if (double.TryParse(val, out double result3))
+                                    {
+                                        point.recovered = result3;
+                                    }
+                                    break;
                             }
                         }
-
-                        //System.Diagnostics.Debug.WriteLine(point.age + point.gender + point.city + point.province + point.country + point.date_confirmation + point.outcome);
-
-                        data.Add(point);
                     }
+                    data.Add(point);
                 }
             }
 
