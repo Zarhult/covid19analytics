@@ -104,5 +104,79 @@ namespace Client
             }
             textBox3.Text = "";
         }
-    }
-}
+        //the following is semi psuedo code for feature 1
+        private void backgroundWorker3_DoWork(object sender, DoWorkEventArgs e) //gets data from inputed date range
+        {
+            vector<COVIDDataPoint> rows; //for searched rows
+
+            if (client.Connected)
+            {
+                if(textBox4.Text == "" && textBox5.Text == "")//if both inputs are empty
+                    //append all
+                    foreach (COVIDDataPoint point in data)
+                    {
+                        rows.append(point);
+                    }
+                else{//else
+                    if (textBox4.Text == "")//if left is empty
+                        //append all on or before right date
+                        foreach (COVIDDataPoint point in data)
+                        {
+                            if (point.date_confirmation <= textBox5.Text)
+                            { //get data on or before right date
+                                rows.append(point);
+                            }
+                        }
+
+                    else if (textBox5.Text == "")//else if right empty
+                            //appned all on or after left date
+                            foreach (COVIDDataPoint point in data)
+                            {
+                                if (point.date_confirmation >= textBox4.Text)
+                                { //get data on or before right date
+                                   rows.append(point);
+                                }
+                            }
+                    //else
+                    if (invalidDate(textBox4.Text) || invalidDate(textBox5.Text))//if either invalid inputs 
+                        MessageBox.Show("Invalid date input");//display error
+                    else if (textBox4.Text > textBox5.Text)//else if right date is before left date 
+                        MessageBox.Show("end date must be after start date");//display error
+                    else
+                    {//else
+                        foreach (COVIDDataPoint point in data)
+                        {
+                            if (point.date_confirmation >= textBox4.Text && point.date_confirmation <= textBox5.Text)
+                            {//get data after left and before right
+                                rows.append(point);
+                            }
+                        }
+                    }
+                    if (rows == null){ //if rows is empty 
+                        MessageBox.Show("No data for that date range");
+                    }
+                    else //rows not empty
+                    {
+                        MessageBox.Show(rows); //display all data points
+                    }
+                }
+                
+                //function to check date (did it this way to make it cleaner somewhat)
+                bool invalidDate(Text t) //checks for invalid date 
+                {
+                    var inputDate = t.Split('.'); //split at each partion (in this case '.' in DD.MM.YYYY)
+
+                    if (inputDate[1] < 1 || inputDate[1] > 12){ //invalid month
+                        return false;
+                    }
+                    else if () {//check for invalid day for month 
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                //end of semi psuedo code
+            }
+        }
