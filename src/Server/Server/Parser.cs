@@ -8,12 +8,11 @@ namespace Server
 {
     public class COVIDDataPoint
     {
-        public DateTime obsDate;
-        public String province = "";
-        public String country = "";
-        public double confirmed = 0.0;
-        public double dead = 0.0;
-        public double recovered = 0.0;
+
+        public String Date = "";
+        public String Country = "";
+        public String Sex = "";
+        public String Age = "";
     }
 
     public class Parser
@@ -32,6 +31,7 @@ namespace Server
                     String line = sr.ReadLine();
 
                     Regex matchCommas = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))"); // Matches all commas in data that aren't inside quotes
+
                     String[] values = matchCommas.Split(line);
 
                     COVIDDataPoint point = new COVIDDataPoint();
@@ -42,7 +42,7 @@ namespace Server
                         values[i] = values[i].TrimEnd('"');
                     }
 
-                    int[] dataIndices = { 1, 2, 3, 5, 6, 7 }; // Indices we care about
+                    int[] dataIndices = {1, 2, 5, 12}; // Indices we care about 1-Age, 2-Sex, 5-Country, 12-Date
                     foreach (int index in dataIndices)
                     {
                         String val = values[index];
@@ -51,36 +51,20 @@ namespace Server
                             switch(index)
                             {
                                 case 1:
-                                    point.obsDate = DateTime.Parse(val);
+
+                                    point.Age = val;
                                     break;
 
                                 case 2:
-                                    point.province = val;
-                                    break;
-
-                                case 3:
-                                    point.country = val;
+                                    point.Sex = val;
                                     break;
 
                                 case 5:
-                                    if (double.TryParse(val, out double result1))
-                                    {
-                                        point.confirmed = result1;
-                                    }
+                                    point.Country = val;
                                     break;
 
-                                case 6:
-                                    if (double.TryParse(val, out double result2))
-                                    {
-                                        point.dead = result2;
-                                    }
-                                    break;
-
-                                case 7:
-                                    if (double.TryParse(val, out double result3))
-                                    {
-                                        point.recovered = result3;
-                                    }
+                                case 12:
+                                    point.Date = val;
                                     break;
                             }
                         }

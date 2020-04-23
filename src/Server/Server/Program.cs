@@ -15,10 +15,10 @@ namespace Server
         [STAThread]
         static void Main()
         {
-            List<COVIDDataPoint> data = Parser.ParseCSV("..\\..\\covid_19_data.csv"); // Go up a couple directories to the data file
+            List<COVIDDataPoint> Data = Parser.ParseCSV("..\\..\\COVID19_open_line_list_Test.csv"); // Go up a couple directories to the data file
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new Form1(Data));
 
             // For testing the parser
             /*
