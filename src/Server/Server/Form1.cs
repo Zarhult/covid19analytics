@@ -16,6 +16,7 @@ using System.IO;
 
 namespace Server
 {
+
     public partial class Form1 : Form
     {
         private TcpClient client;
@@ -24,6 +25,7 @@ namespace Server
         public string recieve;
         public String text_to_send;
         public List<COVIDDataPoint> Rows;
+        public List<COVIDDataPoint> Results;
         public Form1(List<COVIDDataPoint> data)
         {
             Rows = data;
@@ -31,20 +33,28 @@ namespace Server
 
         }
 
-        public int SearchAlgo(String recieve)
+        public string SearchAlgo(String recieve)
         {
             Regex matchCommas = new Regex(",");
             String[] values = matchCommas.Split(recieve);
             int ret = 0;
+            string rets = "";
             foreach (COVIDDataPoint point in Rows)
             {
                 if (values[0].Length > 0 && values[1].Length > 0 && Rows.Count() > 100)
                 {
                     if (DateSearch(values[0].ToString(), point.Date.ToString()) && AgeSearch(values[1].ToString(), point.Age.ToString())
-                        && GenderSearch(values[2].ToString(), point.Sex.ToString()) && CountrySearch(values[3].ToString(), point.Country.ToString())) ret++;
+                        && GenderSearch(values[2].ToString(), point.Sex.ToString()) && CountrySearch(values[3].ToString(), point.Country.ToString()))
+                    {
+                        rets += (point.Date != "") ? point.Date + "," : " ,";
+                        rets += (point.Country != "") ? point.Country + "," : " ,";
+                        rets += (point.Sex != "") ? point.Sex + "," : " ,";
+                        rets += (point.Age != "") ? point.Age + "," : " ,";
+                        ret++;
+                    }
                 }
             }
-            return ret;
+            return ret.ToString() + "," + rets;
         }
         public bool DateSearch(String Date, String COVIDDate)
         {
@@ -170,20 +180,13 @@ namespace Server
                 {
                     recieve = STR.ReadLine();
                     this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Client Requests: " + recieve + "\n"); })); //recieve is the request <--
-                    text_to_send = "There are ";
-                    int max = 0;
-                    for(int i = 0; i < 100; i++)
-                    {
-                        int search = SearchAlgo(recieve);
-                        if (search > max) max = search;
-                    }
-                    if (max > 0) text_to_send += max.ToString();
-                    else text_to_send += "none";
-                    text_to_send += " data points with this search";
-
+                    //text_to_send = "There are ";
+                    string search = "";
+                    search = SearchAlgo(recieve);
+                    //text_to_send += " data points with this search";
+                    text_to_send = search;
                     backgroundWorker2.RunWorkerAsync();
                     recieve = "";
-
                 }
                 catch (Exception x)
                 {
