@@ -16,6 +16,7 @@ using System.IO;
 
 namespace Server
 {
+
     public partial class Form1 : Form
     {
         private TcpClient client;
@@ -24,6 +25,7 @@ namespace Server
         public string recieve;
         public String text_to_send;
         public List<COVIDDataPoint> Rows;
+        public List<COVIDDataPoint> Results;
         public Form1(List<COVIDDataPoint> data)
         {
             Rows = data;
@@ -31,20 +33,29 @@ namespace Server
 
         }
 
-        public int SearchAlgo(String recieve)
+        public string SearchAlgo(String recieve)
         {
             Regex matchCommas = new Regex(",");
             String[] values = matchCommas.Split(recieve);
             int ret = 0;
+            string rets = "";
             foreach (COVIDDataPoint point in Rows)
             {
                 if (values[0].Length > 0 && values[1].Length > 0 && Rows.Count() > 100)
                 {
                     if (DateSearch(values[0].ToString(), point.Date.ToString()) && AgeSearch(values[1].ToString(), point.Age.ToString())
-                        && GenderSearch(values[2].ToString(), point.Sex.ToString()) && CountrySearch(values[3].ToString(), point.Country.ToString())) ret++;
+                        && GenderSearch(values[2].ToString(), point.Sex.ToString()) && CountrySearch(values[3].ToString(), point.Country.ToString()))
+                    {
+                        rets += point.ID.ToString() + ",";
+                        rets += (point.Date != "") ? point.Date + "," : " ,";
+                        rets += (point.Country != "") ? point.Country + "," : " ,";
+                        rets += (point.Sex != "") ? point.Sex + "," : " ,";
+                        rets += (point.Age != "") ? point.Age + "," : " ,";
+                        ret++;
+                    }
                 }
             }
-            return ret;
+            return ret.ToString() + "," + rets;
         }
         public bool DateSearch(String Date, String COVIDDate)
         {
@@ -169,21 +180,38 @@ namespace Server
                 try
                 {
                     recieve = STR.ReadLine();
-                    this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Client Requests: " + recieve + "\n"); })); //recieve is the request <--
-                    text_to_send = "There are ";
-                    int max = 0;
-                    for(int i = 0; i < 100; i++)
-                    {
-                        int search = SearchAlgo(recieve);
-                        if (search > max) max = search;
-                    }
-                    if (max > 0) text_to_send += max.ToString();
-                    else text_to_send += "none";
-                    text_to_send += " data points with this search";
 
+                    this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Client Requests: " + recieve + "\n"); })); //recieve is the request <--
+                    //text_to_send = "There are ";
+                    string search = "";
+                    if (recieve.Substring(0,3) == "New")
+                    {
+                        AddNewPoint(recieve);
+                        text_to_send = "Added";
+                    }
+                    //text_to_send += " data points with this search";
+                    else if(recieve.Substring(0,6) == "Update")
+                    {
+                        UpdateDataPoint(recieve);
+                        text_to_send = "Updated";
+                    }
+                    else if(recieve.Substring(0,6) == "Delete")
+                    {
+                        DeleteDataPoint(recieve);
+                        text_to_send = "Deleted";
+                    }
+                    else if(recieve.Substring(0,6) == "Import")
+                    {
+                        ImportData(recieve);
+                        text_to_send = "Imported";
+                    }
+                    else
+                    {
+                        search = SearchAlgo(recieve);
+                        text_to_send = search;
+                    }
                     backgroundWorker2.RunWorkerAsync();
                     recieve = "";
-
                 }
                 catch (Exception x)
                 {
@@ -216,6 +244,135 @@ namespace Server
                 backgroundWorker2.RunWorkerAsync();
             }
             textBox3.Text = "";
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            StringBuilder csvBackup = new StringBuilder();
+            csvBackup.AppendLine("ID,Date,Country,Sex,Age");
+            string Line;
+            foreach (COVIDDataPoint Point in Rows)
+            {
+                Line = Point.ID.ToString() + "," + Point.Date + "," + Point.Country + "," + Point.Sex + "," + Point.Age;
+                csvBackup.AppendLine(Line);
+            }
+            string Path = "..\\..\\backup\\BackedupData.csv";
+            if (File.Exists(Path))
+            {
+                File.Delete(Path);
+            }
+            File.AppendAllText(Path, csvBackup.ToString());
+        }
+        //Add New Data Point
+        public void AddNewPoint(string Point)
+        {
+            string DataPoint = Point.Substring(16);
+            Regex matchCommas = new Regex(",");
+            String[] values = matchCommas.Split(DataPoint);
+            COVIDDataPoint NewPoint = new COVIDDataPoint();
+            NewPoint.Date = values[0];
+            NewPoint.Country = values[1];
+            NewPoint.Sex = values[2];
+            NewPoint.Age = values[3];
+            NewPoint.ID = Rows[Rows.Count - 1].ID + 1;
+            Rows.Add(NewPoint);
+            string NewDate = NewPoint.Date[3].ToString() + NewPoint.Date[4].ToString() + '.' + NewPoint.Date[0].ToString() + NewPoint.Date[1].ToString() + ".20" + NewPoint.Date[6].ToString() + NewPoint.Date[7].ToString();
+            string Path = "..\\..\\COVID19_open_line_list_Test.csv";
+            StringBuilder Line = new StringBuilder();
+            string newLine = NewPoint.ID.ToString() + "," + NewPoint.Age + "," + NewPoint.Sex + "," + "," + "," + NewPoint.Country + "," + "," + "," + "," + "," + "," + "," + NewDate;
+            Line.Append(newLine);
+            File.AppendAllText(Path, Line.ToString());
+        }
+        public void UpdateDataPoint(string Point)
+        {
+            string DataPoint = Point.Substring(19);
+            Regex matchCommas = new Regex(",");
+            String[] values = matchCommas.Split(DataPoint);
+            int i = 0;
+            while (Rows[i].ID.ToString() != values[0])
+                i++;
+            Rows[i].Date = values[1];
+            Rows[i].Country = values[2];
+            Rows[i].Sex = values[3];
+            Rows[i].Age = values[4];
+            string NewDate = Rows[i].Date[3].ToString() + Rows[i].Date[4].ToString() + '.' + Rows[i].Date[0].ToString() + Rows[i].Date[1].ToString() + ".20" + Rows[i].Date[6].ToString() + Rows[i].Date[7].ToString();
+            string Path = "..\\..\\COVID19_open_line_list_Test.csv";
+            List<String> lines = new List<String>();
+            if (File.Exists(Path))
+            {
+                using (StreamReader reader = new StreamReader(Path))
+                {
+                    String line;
+
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (line.Contains(","))
+                        {
+                            String[] split = line.Split(',');
+
+                            if (split[0].Contains(values[0]))
+                            {
+                                split[1] = values[4];
+                                split[2] = values[3];
+                                split[5] = values[2];
+                                split[12] = NewDate;
+                                line = String.Join(",", split);
+                            }
+                        }
+
+                        lines.Add(line);
+                    }
+                }
+
+                using (StreamWriter writer = new StreamWriter(Path, false))
+                {
+                    foreach (String line in lines)
+                        writer.WriteLine(line);
+                }
+            }
+        }
+        public void DeleteDataPoint(string Point)
+        {
+            string DataPoint = Point.Substring(21);
+            int i = 0;
+            while (Rows[i].ID.ToString() != DataPoint)
+                i++;
+            Rows.RemoveAt(i);
+            string Path = "..\\..\\COVID19_open_line_list_Test.csv";
+            List<String> lines = new List<String>();
+            if (File.Exists(Path))
+            {
+                using (StreamReader reader = new StreamReader(Path))
+                {
+                    String line;
+
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (!(line.Contains(DataPoint)))
+                        {
+                            lines.Add(line);
+                        }
+                    }
+                }
+
+                using (StreamWriter writer = new StreamWriter(Path, false))
+                {
+                    foreach (String line in lines)
+                        writer.WriteLine(line);
+                }
+            }
+
+        }
+        public void ImportData(string Data)
+        {
+            Regex matchLines = new Regex(";");
+            String[] values = matchLines.Split(Data);
+            string sent = "";
+            for(int i = 1; i < values.Length - 1; i++)
+            {
+                sent = "New Data Point: " + values[i];
+                UpdateDataPoint(sent);
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Server
 {
     public class COVIDDataPoint
     {
-
+        public int ID = 0;
         public String Date = "";
         public String Country = "";
         public String Sex = "";
@@ -42,7 +42,7 @@ namespace Server
                         values[i] = values[i].TrimEnd('"');
                     }
 
-                    int[] dataIndices = {1, 2, 5, 12}; // Indices we care about 1-Age, 2-Sex, 5-Country, 12-Date
+                    int[] dataIndices = {0, 1, 2, 5, 12}; // Indices we care about 0-ID 1-Age, 2-Sex, 5-Country, 12-Date
                     foreach (int index in dataIndices)
                     {
                         String val = values[index];
@@ -50,6 +50,10 @@ namespace Server
                         {
                             switch(index)
                             {
+                                case 0:
+                                    point.ID = Int32.Parse(val);
+                                    break;
+
                                 case 1:
 
                                     point.Age = val;

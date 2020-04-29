@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.Text.RegularExpressions;
 //Allowing communication between server and client
 using System.Net;
 using System.Net.Sockets;
@@ -15,6 +15,7 @@ using System.IO;
 
 namespace Client
 {
+
     public partial class Form1 : Form
     {
         private TcpClient client;
@@ -27,6 +28,9 @@ namespace Client
         public String gender;
         public String countries;
         public String SendMessage;
+        public Form2 DataTable;
+        public Import ImportWindow;
+        public List<COVIDDataPoint> Result;
         public Form1()
         {
             InitializeComponent();
@@ -129,7 +133,36 @@ namespace Client
                 try
                 {
                     recieve = STR.ReadLine();
-                    this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
+                    Regex matchComma = new Regex(",");
+                    String[] Results = matchComma.Split(recieve);
+                    int numOfResults = Int32.Parse(Results[0]);
+                    if(numOfResults == 0)
+                    {
+                        recieve = "There are no Data points with the given Search";
+                        this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
+                    }
+                    else
+                    {
+                        int numOfPoints = 5 * numOfResults;
+                        List<COVIDDataPoint> SearchResults = new List<COVIDDataPoint>();
+                        for(int i = 1; i < numOfPoints; i += 5)
+                        {
+                            COVIDDataPoint point = new COVIDDataPoint();
+                            point.ID = Int32.Parse(Results[i]);
+                            point.Date = Results[i+1];
+                            point.Country = Results[i + 2];
+                            point.Sex = Results[i + 3];
+                            point.Age = Results[i + 4];
+                            SearchResults.Add(point);
+                        }
+                        Result = SearchResults;
+                        recieve = "There are " + numOfResults.ToString() + " Results for the specific Search";
+                        this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
+                        // PROBLEM: "country" is missing from most of the data in Result
+//                        DataTable.Close();
+                        DataTable = new Form2(this, Result);
+                        Application.Run(DataTable);
+                    }
                     recieve = "";
 
                 }
@@ -145,7 +178,7 @@ namespace Client
             if (client.Connected)
             {
                 STW.WriteLine(text_to_send);
-                this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Client Requests: " + SendMessage + "\n"); }));
+                this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Client Requests: " + text_to_send + "\n"); }));
 
             }
             else
@@ -216,9 +249,9 @@ namespace Client
                     for (int i = 0; i < checkedListBox1.CheckedItems.Count; i++)
                         countries += checkedListBox1.CheckedItems[i].ToString() + ' ';
                     if (countries == "") countries = "All Countries";
-                    backgroundWorker2.RunWorkerAsync();
                     text_to_send = date + "," + age + "," + gender + "," + countries;
                     SendMessage = date + ", " + age + ", " + gender + ", " + countries;
+                    backgroundWorker2.RunWorkerAsync();
                 }
                 else
                 {
@@ -242,6 +275,24 @@ namespace Client
         {
             for (int i = 0; i < checkedListBox1.Items.Count; i++) checkedListBox1.SetItemChecked(i, false);
         }
+        public void SendMsg(string msg)
+        {
+            text_to_send = msg;
+            backgroundWorker2.RunWorkerAsync();
+        }
 
+        private void button3_Click(object sender, EventArgs e)
+        {
+            ImportWindow = new Import(this);
+            ImportWindow.Show();
+        }
+    }
+    public class COVIDDataPoint
+    {
+        public int ID = 0;
+        public String Date = "";
+        public String Country = "";
+        public String Sex = "";
+        public String Age = "";
     }
 }
