@@ -20,3 +20,14 @@ C:\Users\User\Documents\Spring 2020\CS 180\Versions\Sprint 4\qttest-master\src\C
 C:\Users\User\Documents\Spring 2020\CS 180\Versions\Sprint 4\qttest-master\src\Client\Client\obj\Debug\Client.exe
 C:\Users\User\Documents\Spring 2020\CS 180\Versions\Sprint 4\qttest-master\src\Client\Client\obj\Debug\Client.pdb
 C:\Users\User\Documents\Spring 2020\CS 180\Versions\Sprint 4\qttest-master\src\Client\Client\obj\Debug\Client.COVIDDataPoint.resources
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\bin\Debug\Client.exe.config
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\bin\Debug\Client.exe
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\bin\Debug\Client.pdb
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\obj\Debug\Client.Form1.resources
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\obj\Debug\Client.Form2.resources
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\obj\Debug\Client.Properties.Resources.resources
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\obj\Debug\Client.csproj.GenerateResource.cache
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\obj\Debug\Client.exe
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\obj\Debug\Client.pdb
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\obj\Debug\Client.csprojAssemblyReference.cache

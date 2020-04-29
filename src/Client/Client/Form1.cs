@@ -156,7 +156,8 @@ namespace Client
                         Result = SearchResults;
                         recieve = "There are " + numOfResults.ToString() + " Results for the specific Search";
                         this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
-                        //Invoke the Form 2... We will populate the table with these results.
+                        // PROBLEM: "country" is missing from most of the data in Result
+                        Application.Run(new Form2(Result));
                     }
                     recieve = "";
 
