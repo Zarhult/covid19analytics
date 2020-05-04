@@ -4,14 +4,8 @@
     "\\src",
     "\\src\\Client",
     "\\src\\Client\\Client",
-    "\\src\\Server",
-    "\\src\\Server\\Server",
-    "\\src\\Server\\Server\\bin",
-    "\\src\\Server\\Server\\bin\\Release",
-    "\\src\\Server\\Server\\obj",
-    "\\src\\Server\\Server\\obj\\Release",
-    "\\src\\Server\\Server\\Properties"
+    "\\src\\Server"
   ],
-  "SelectedNode": "\\src\\Server\\Server\\Parser.cs",
+  "SelectedNode": "\\src\\Server\\Server.sln",
   "PreviewInSolutionExplorer": false
 }

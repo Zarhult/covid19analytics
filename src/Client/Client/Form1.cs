@@ -286,6 +286,12 @@ namespace Client
             ImportWindow = new Import(this);
             ImportWindow.Show();
         }
+
+        private void button4_Click(object sender, EventArgs e) //analytics button
+        {
+            Form3 f3 = new Form3();
+            f3.Show();
+        }
     }
     public class COVIDDataPoint
     {

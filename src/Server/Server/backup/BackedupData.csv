@@ -12091,7 +12091,6 @@ ID,Date,Country,Sex,Age
 12627,25.02.2020,Bahrain,female,
 12628,25.02.2020,Bahrain,female,
 12629,25.02.2020,Bahrain,female,
-12630,25.02.2020,Bahrain,female,
 12631,25.02.2020,Bahrain,male,
 12632,25.02.2020,Bahrain,male,
 12633,25.02.2020,Bahrain,male,
@@ -12940,3 +12939,5 @@ ID,Date,Country,Sex,Age
 13477,28.02.2020,Japan,female,0-10
 13478,28.02.2020,Netherlands,female,
 13479,29.02.2020,Ecuador,female,
+13481,21.01.2020,Egypt,male,55
+13482,,Japan,female,55
