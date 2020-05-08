@@ -14,6 +14,7 @@ namespace Client
     public partial class Form2 : Form
     {
         private TableLayoutPanel panel;
+        private TabPage DataPage;
         public List<COVIDDataPoint> Result;
         public Form1 Parent;
         public NewDataPoint NewPoint;
@@ -24,6 +25,8 @@ namespace Client
             InitializeComponent();
             Result = data;
             Parent = ParentForm;
+            tabControl1.SelectTab("tabPage1");
+            DataPage = tabControl1.SelectedTab;
             // Initialize data view table
             panel = new TableLayoutPanel();
             panel.Location = new System.Drawing.Point(88, 100);
@@ -39,7 +42,7 @@ namespace Client
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
             panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
 
-            Controls.Add(panel);
+            DataPage.Controls.Add(panel);
             panel.Controls.Add(new Label() { Text = "ID" }, 0, 0);
             panel.Controls.Add(new Label() { Text = "Date" }, 1, 0);
             panel.Controls.Add(new Label() { Text = "Country" }, 2, 0);
@@ -81,6 +84,7 @@ namespace Client
 
                 ++row;
             }
+
         }
 
         private void button3_Click(object sender, EventArgs e)
