@@ -154,5 +154,81 @@ namespace Client
                 MessageBox.Show("No Data Point Searched with that ID");
             }
         }
+
+        private void button4_Click(object sender, EventArgs e) //projection
+        {
+            int projection = 0;
+            int numDays = 0;
+            //check date
+            if (dateCheck(textBox2.Text) && textBox2.Text != "" && futurecheck(textBox2.Text))
+            {
+                numDays = getDays(textBox2.Text); //get number of days 
+                projection = (13175 / 49) * numDays; //get projection
+
+                //display to the user
+                textBox4.Text = "There are " + projection.ToString() + " projected cases on " + textBox2.Text + 
+                    ". Note: the projection is just an estimate based on the data available and as such may not be accurate."; 
+            }
+            else
+            {
+                MessageBox.Show("Invalid or no Date"); //error message
+            }
+        }
+
+        public bool dateCheck(String date)
+        {
+            if (date == "") return true;
+            if (date.Length != 8) return false; //Make sure it is correct format
+            if (date[0] > '1' || date[0] < '0') return false; //Tens place check
+            if (date[0] == '0' && (date[1] > '9' || date[1] < '0')) return false; //Single digit dates
+            if (date[0] == '1' && (date[1] > '2' || date[1] < '0')) return false; //Double digit dates
+            if (date[2] != '/') return false; //Format
+            if (date[3] > '3' || date[3] < '0') return false; //Tens place
+            if (date[3] == '0' && (date[4] > '9' || date[4] < '0')) return false;
+            if (date[3] == '1' && (date[4] > '9' || date[4] < '0')) return false;
+            if (date[3] == '3' && (date[4] > '1' || date[4] < '0')) return false;
+            if (date[5] != '/') return false;
+            if (date[6] > '9' || date[6] < '0') return false;
+            if (/*date[6] == '0' &&*/ (date[7] > '9' || date[7] < '0')) return false;
+           // if (date[6] == '1' && (date[7] > '9' || date[7] < '0')) return false;
+           // if (date[6] == '2' && date[7] != '0') return false;
+            return true;
+        }
+
+        public bool futurecheck(String date) //check if date is after latest date in data set (Feb. 29, 2020)
+        {
+            if (date[6] < '2') return false;
+            if (date[6] == '2' && date[7] == '0' && date[0] == '1') return false;
+            if (date[6] == '2' && date[7] == '0' && date[0] == '0' && date[1] < '3') return false;
+            return true;
+        }
+
+        public int getDays(String date) //number of days from Feb 29, 2020 to given date
+        {
+            int num = 0;
+
+            num = ((date[6] - '2') * 3650) + ((date[7] - '0') * 365) + ((date[3] - '0') * 10) + (date[4] - '0'); //add amount of days in year and day given
+            if (date[0] == '0' && date[1] < '3') //calculate ammount of days in month given
+            {
+                num = num - (('2' - date[1]) * 30);
+            }
+            else if(date[0] == '1')
+            {
+                if(date[1] == '1')
+                {
+                    num = num + (9 * 30);
+                }
+                else if (date[1] == '2')
+                {
+                    num = num + (10 * 30);
+                }
+            }
+            else
+            {
+                num = num + ((date[1] - '2') * 30);
+            }
+
+            return num;
+        }
     }
 }
