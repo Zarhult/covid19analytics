@@ -159,7 +159,7 @@ namespace Client
                         recieve = "There are " + numOfResults.ToString() + " Results for the specific Search";
                         this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
                         // PROBLEM: "country" is missing from most of the data in Result
-//                        DataTable.Close();
+                        //DataTable.Close();
                         DataTable = new Form2(this, Result);
                         Application.Run(DataTable);
                     }
@@ -179,7 +179,6 @@ namespace Client
             {
                 STW.WriteLine(text_to_send);
                 this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Client Requests: " + text_to_send + "\n"); }));
-
             }
             else
             {
@@ -285,6 +284,25 @@ namespace Client
         {
             ImportWindow = new Import(this);
             ImportWindow.Show();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            if (checkedListBox1.CheckedItems.Count == 1)
+            {
+                // todo: make sure Result is set even if user hasn't searched before
+
+                // Sort Result by date using DateTime comparisons without changing the date strings themselves
+                Result.Sort((x, y) => DateTime.Compare(DateTime.ParseExact(x.Date, "dd.MM.yyyy", null), DateTime.ParseExact(y.Date, "dd.MM.yyyy", null)));
+
+                // make a form popup to visualize spread using the sorted array
+                //ShowSpread = new ShowSpread();
+                //ShowSpread.Show();
+            }
+            else
+            {
+                MessageBox.Show("Must select one country to show spread.");
+            }
         }
     }
     public class COVIDDataPoint
