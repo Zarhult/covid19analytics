@@ -48,3 +48,4 @@ C:\Users\User\Documents\Spring 2020\CS 180\Versions\Sprint 4-2\qttest-DataDispla
 C:\Users\O5-3\Source\Repos\qttest\src\Client\Client\obj\Debug\Client.Import.resources
 C:\Users\O5-3\Source\Repos\qttest\src\Client\Client\obj\Debug\Client.NewDataPoint.resources
 C:\Users\O5-3\Source\Repos\qttest\src\Client\Client\obj\Debug\Client.UpdateDataPoint.resources
+C:\Users\O5-3\source\repos\qttest\src\Client\Client\obj\Debug\Client.ShowSpread.resources

@@ -29,6 +29,7 @@ namespace Client
         public String countries;
         public String SendMessage;
         public Form2 DataTable;
+        public ShowSpread SpreadVisualize;
         public Import ImportWindow;
         public List<COVIDDataPoint> Result;
         public Form1()
@@ -291,17 +292,19 @@ namespace Client
             if (checkedListBox1.CheckedItems.Count == 1)
             {
                 // todo: make sure Result is set even if user hasn't searched before
+                // todo: make deep copy of Result instead of modifying it directly
 
                 // Sort Result by date using DateTime comparisons without changing the date strings themselves
                 Result.Sort((x, y) => DateTime.Compare(DateTime.ParseExact(x.Date, "dd.MM.yyyy", null), DateTime.ParseExact(y.Date, "dd.MM.yyyy", null)));
 
-                // make a form popup to visualize spread using the sorted array
-                //ShowSpread = new ShowSpread();
-                //ShowSpread.Show();
+                // Make a form popup to visualize spread using the sorted array
+                SpreadVisualize = new ShowSpread(this);
+                SpreadVisualize.Show();
+                SpreadVisualize.Visualize();
             }
             else
             {
-                MessageBox.Show("Must select one country to show spread.");
+                MessageBox.Show("Must select one country to visualize virus spread of.");
             }
         }
     }
