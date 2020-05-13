@@ -64,6 +64,7 @@ namespace Client
                         case 0:
                             panel.Controls.Add(new Label() { Text = point.ID.ToString() }, i, row);
                             break;
+
                         case 1:
                             panel.Controls.Add(new Label() { Text = point.Date }, i, row);
                             break;

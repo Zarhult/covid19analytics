@@ -11,6 +11,10 @@
     "\\src\\Server\\Server\\obj\\Release",
     "\\src\\Server\\Server\\Properties"
   ],
+<<<<<<< HEAD
   "SelectedNode": "\\src\\Client\\Client.sln",
+=======
+  "SelectedNode": "\\src\\Server\\Server.sln",
+>>>>>>> origin/ShowSpread
   "PreviewInSolutionExplorer": false
 }
