@@ -157,22 +157,59 @@ namespace Client
 
         private void button4_Click(object sender, EventArgs e) //projection
         {
-            int projection = 0;
-            int numDays = 0;
+            double projection = Result.Count; //initialized with known number of cases 
+            double numDays = 0;
             //check date
             if (dateCheck(textBox2.Text) && textBox2.Text != "" && futurecheck(textBox2.Text))
             {
-                numDays = getDays(textBox2.Text); //get number of days 
-                projection = (13175 / 49) * numDays; //get projection
+                int begin = beginDate(Result); //earliest date
+                int end = endDate(Result); //latest date
+                double days = begin - end; // total number of days in Result data
+                double rate = (Result.Count / days); //avg num of cases per day
+                numDays = getFutureDays(textBox2.Text); //get number of days 
+                projection = Math.Round(projection + (rate * numDays)); //get projection
 
                 //display to the user
                 textBox4.Text = "There are " + projection.ToString() + " projected cases on " + textBox2.Text + 
-                    ". Note: the projection is just an estimate based on the data available and as such may not be accurate."; 
+                    " for the searched data. Note: the projection is just an estimate based on the data searched for and as such may not be accurate."; 
             }
             else
             {
                 MessageBox.Show("Invalid or no Date"); //error message
             }
+            
+        }
+
+        public int endDate(List<COVIDDataPoint> data) //gets latest date in data; returns -1 if there is an error
+        {
+            int day = 1000; 
+            foreach (COVIDDataPoint point in data)
+            {
+                if(day > getDays(point.Date.ToString()))
+                {
+                    day = getDays(point.Date.ToString());
+                }
+            }
+            
+            if (day == 1000) //if for some reason could not get latest date 
+            {
+                return -1; //return error
+            }
+
+            return day;
+        }
+
+        public int beginDate(List<COVIDDataPoint> data) //gets earliest date in data; returns -1 if there is an error
+        {
+            int day = -1; 
+            foreach (COVIDDataPoint point in data)
+            {
+                if (day < getDays(point.Date.ToString())) 
+                {
+                    day = getDays(point.Date.ToString());
+                }
+            }
+            return day;
         }
 
         public bool dateCheck(String date)
@@ -189,46 +226,56 @@ namespace Client
             if (date[3] == '3' && (date[4] > '1' || date[4] < '0')) return false;
             if (date[5] != '/') return false;
             if (date[6] > '9' || date[6] < '0') return false;
-            if (/*date[6] == '0' &&*/ (date[7] > '9' || date[7] < '0')) return false;
-           // if (date[6] == '1' && (date[7] > '9' || date[7] < '0')) return false;
-           // if (date[6] == '2' && date[7] != '0') return false;
-            return true;
+            if ((date[7] > '9' || date[7] < '0')) return false;
+           return true;
         }
 
         public bool futurecheck(String date) //check if date is after latest date in data set (Feb. 29, 2020)
         {
             if (date[6] < '2') return false;
-            if (date[6] == '2' && date[7] == '0' && date[0] == '1') return false;
             if (date[6] == '2' && date[7] == '0' && date[0] == '0' && date[1] < '3') return false;
             return true;
         }
 
-        public int getDays(String date) //number of days from Feb 29, 2020 to given date
+        public int getDays(String date) //date in dataset where Jan 12, 2020 = 0; Jan 13, 2020 = 1; etc.
         {
             int num = 0;
+            num = ((date[4] - '1') * 31) + ((date[0] - '1') * 10) + (date[1] - '2');
+            return num;
+        }
 
+        public int getFutureDays(String date) //number of days from Feb 29, 2020 to given date
+        {
+            int num = 0;
+            
             num = ((date[6] - '2') * 3650) + ((date[7] - '0') * 365) + ((date[3] - '0') * 10) + (date[4] - '0'); //add amount of days in year and day given
+
             if (date[0] == '0' && date[1] < '3') //calculate ammount of days in month given
             {
-                num = num - (('2' - date[1]) * 30);
+                num = num - (('3' - date[1]) * 30);
             }
-            else if(date[0] == '1')
+
+            else if (date[0] == '1')
             {
-                if(date[1] == '1')
+                if (date[1] == '1')
                 {
                     num = num + (9 * 30);
                 }
+
                 else if (date[1] == '2')
                 {
                     num = num + (10 * 30);
                 }
+
             }
+
             else
             {
-                num = num + ((date[1] - '2') * 30);
+                num = num + ((date[1] - '3') * 30);
             }
 
             return num;
+
         }
     }
 }
