@@ -13,8 +13,8 @@ namespace Client
 {
     public partial class ShowSpread : Form
     {
-        public Form1 Parent;
-        List<COVIDDataPoint> ResultRef; // reference to Form1's Result
+        public Form1 Parent;                                    // Reference to Form1
+        List<COVIDDataPoint> ResultRef;                         // Reference to Form1's Result
         private Color RectColor = Color.FromArgb(255, 0, 0, 0); // Initially black
         private Graphics SprdGraphics;
         private SolidBrush SprdBrush;
@@ -46,10 +46,25 @@ namespace Client
 
         public void Visualize()
         {
-            // test
-            UpdateColor(255, 0, 0, 0);
-            Thread.Sleep(1000);
-            UpdateColor(255, 255, 255, 255);
+            // Redden rectangle as virus spreads, becoming completely red when reach most recent data
+            int Cases = ResultRef.Count;
+            int TimeStep = 200;                 // Time per day (ms)
+            double RednessStep = 255.0 / Cases; // How much to redden for each case
+            double TotalRedness = 0;            // Total redness from accumulated steps, which must then be rounded to an int
+
+            // First case
+            TotalRedness += RednessStep;
+            UpdateColor(255, (int)TotalRedness, 0, 0);
+            // Loop for the rest of cases
+            for (int i = 0; i + 1 < Cases; ++i)
+            {
+                TotalRedness += RednessStep;
+                int DayGap = (DateTime.ParseExact(ResultRef[i + 1].Date, "dd.MM.yyyy", null) - DateTime.ParseExact(ResultRef[i].Date, "dd.MM.yyyy", null)).Days;
+                Thread.Sleep(DayGap * TimeStep);
+                UpdateColor(255, (int)TotalRedness, 0, 0);
+            }
+
+            this.label1.Visible = true; // Let user know it's done
         }
     }
 }
