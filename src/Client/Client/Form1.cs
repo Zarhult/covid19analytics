@@ -29,6 +29,7 @@ namespace Client
         public String countries;
         public String SendMessage;
         public Form2 DataTable;
+        public ShowSpread SpreadVisualize;
         public Import ImportWindow;
         public List<COVIDDataPoint> Result;
         public Form1()
@@ -159,7 +160,7 @@ namespace Client
                         recieve = "There are " + numOfResults.ToString() + " Results for the specific Search";
                         this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
                         // PROBLEM: "country" is missing from most of the data in Result
-//                        DataTable.Close();
+                        //DataTable.Close();
                         DataTable = new Form2(this, Result);
                         Application.Run(DataTable);
                     }
@@ -179,7 +180,6 @@ namespace Client
             {
                 STW.WriteLine(text_to_send);
                 this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Client Requests: " + text_to_send + "\n"); }));
-
             }
             else
             {
@@ -286,6 +286,7 @@ namespace Client
             ImportWindow = new Import(this);
             ImportWindow.Show();
         }
+
     }
     public class COVIDDataPoint
     {
