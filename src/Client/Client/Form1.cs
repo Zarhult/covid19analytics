@@ -287,26 +287,6 @@ namespace Client
             ImportWindow.Show();
         }
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-            if (checkedListBox1.CheckedItems.Count == 1)
-            {
-                // todo: make sure Result is set even if user hasn't searched before
-                // todo: make deep copy of Result instead of modifying it directly
-
-                // Sort Result by date using DateTime comparisons without changing the date strings themselves
-                Result.Sort((x, y) => DateTime.Compare(DateTime.ParseExact(x.Date, "dd.MM.yyyy", null), DateTime.ParseExact(y.Date, "dd.MM.yyyy", null)));
-
-                // Make a form popup to visualize spread using the sorted array
-                SpreadVisualize = new ShowSpread(this);
-                SpreadVisualize.Show();
-                SpreadVisualize.Visualize();
-            }
-            else
-            {
-                MessageBox.Show("Must select one country to visualize virus spread of.");
-            }
-        }
     }
     public class COVIDDataPoint
     {

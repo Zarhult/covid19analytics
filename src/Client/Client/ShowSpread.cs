@@ -13,21 +13,33 @@ namespace Client
 {
     public partial class ShowSpread : Form
     {
-        public Form1 Parent;                                    // Reference to Form1
+        public Form2 Parent;                                    // Reference to Form1
         List<COVIDDataPoint> ResultRef;                         // Reference to Form1's Result
         private Color RectColor = Color.FromArgb(255, 0, 0, 0); // Initially black
         private Graphics SprdGraphics;
         private SolidBrush SprdBrush;
 
-        public ShowSpread(Form1 ParentForm)
+        public ShowSpread(Form2 ParentForm, string country)
         {
             Parent = ParentForm;
-            ResultRef = Parent.Result;
+            List<COVIDDataPoint> results = new List<COVIDDataPoint>();
+            foreach(COVIDDataPoint point in Parent.Result)
+            {
+                if (point.Country == country)
+                    results.Add(point);
+            }
+            ResultRef = results;
+
             InitializeComponent();
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
+            if (ResultRef.Count == 0)
+            {
+                System.Windows.Forms.MessageBox.Show("No Data for specified country");
+                this.Close();
+            }
             base.OnPaint(e);
 
             // Draw centered rectangle using color member
@@ -46,6 +58,7 @@ namespace Client
 
         public void Visualize()
         {
+
             // Redden rectangle as virus spreads, becoming completely red when reach most recent data
             int Cases = ResultRef.Count;
             int TimeStep = 200;                 // Time per day (ms)
@@ -66,5 +79,6 @@ namespace Client
 
             this.label1.Visible = true; // Let user know it's done
         }
+
     }
 }
