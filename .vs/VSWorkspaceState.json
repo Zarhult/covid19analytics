@@ -2,19 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\src",
-    "\\src\\Client",
-    "\\src\\Client\\Client",
-    "\\src\\Server",
-    "\\src\\Server\\Server",
-    "\\src\\Server\\Server\\bin",
-    "\\src\\Server\\Server\\obj",
-    "\\src\\Server\\Server\\obj\\Release",
-    "\\src\\Server\\Server\\Properties"
+    "\\src\\Client"
   ],
-<<<<<<< HEAD
   "SelectedNode": "\\src\\Client\\Client.sln",
-=======
-  "SelectedNode": "\\src\\Server\\Server.sln",
->>>>>>> origin/ShowSpread
   "PreviewInSolutionExplorer": false
 }

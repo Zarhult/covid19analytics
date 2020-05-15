@@ -31,6 +31,7 @@ namespace Client
             Parent = ParentForm;
             tabControl1.SelectTab("tabPage1");
             DataPage = tabControl1.SelectedTab;
+
             // Initialize data view table
             panel = new TableLayoutPanel();
             panel.Location = new System.Drawing.Point(88, 100);
@@ -54,50 +55,82 @@ namespace Client
             panel.Controls.Add(new Label() { Text = "Age" }, 4, 0);
 
             // Fill with data
-            int row = 1;
-
             foreach (COVIDDataPoint point in data)
             {
-                panel.RowCount += 1;
-                panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
+                addRow(point.ID, point.Date, point.Country, point.Sex, point.Age);
+            }
+        }
+        public int getRowId(int PointID)
+        {
+            int rowId = -1;
 
-                for (int i = 0; i <= 4; ++i)
+            try
+            {
+                for (int i = 0; i < panel.Controls.Count; i += 5) // i += 5 because 5 controls per row
                 {
-                    switch (i)
+                    var control = panel.Controls[i];
+
+                    if (control is Label && ((Label)control).Text == PointID.ToString())
                     {
-                        case 0:
-                            panel.Controls.Add(new Label() { Text = point.ID.ToString() }, i, row);
-                            break;
-
-                        case 1:
-                            panel.Controls.Add(new Label() { Text = point.Date }, i, row);
-                            break;
-
-                        case 2:
-                            panel.Controls.Add(new Label() { Text = point.Country }, i, row);
-                            break;
-
-                        case 3:
-                            panel.Controls.Add(new Label() { Text = point.Sex }, i, row);
-                            break;
-
-                        case 4:
-                            panel.Controls.Add(new Label() { Text = point.Age }, i, row);
-                            break;
+                        rowId = i / 5;
                     }
                 }
 
-                ++row;
+                if (rowId == -1) // Failure
+                {
+                    throw new System.Exception("getRowId failed.");
+                }
+            }
+            catch (Exception x)
+            {
+                MessageBox.Show(x.Message.ToString());
             }
 
+            return rowId;
         }
+        public void clearRow(int PointID)
+        {
+            int rowId = getRowId(PointID);
+            if (rowId != -1)
+            {
+                panel.RowStyles[rowId].Height = 0;
 
+                for (int i = 0; i < 5; ++i)
+                {
+                    panel.Controls[rowId * 5 + i].Hide(); // Hide all 5 controls
+                }
+            }
+        }
+        public void addRow(int PointID, String Date, String Country, String Sex, String Age)
+        {
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
+
+            int rowNum = panel.RowCount;
+            panel.Controls.Add(new Label() { Text = PointID.ToString() }, 0, rowNum);
+            panel.Controls.Add(new Label() { Text = Date }, 1, rowNum);
+            panel.Controls.Add(new Label() { Text = Country }, 2, rowNum);
+            panel.Controls.Add(new Label() { Text = Sex }, 3, rowNum);
+            panel.Controls.Add(new Label() { Text = Age }, 4, rowNum);
+
+            panel.RowCount += 1;
+        }
+        public void updateRow(int PointID, String Date, String Country, String Sex, String Age)
+        {
+            int rowId = getRowId(PointID);
+            if (rowId != -1)
+            {
+                panel.Controls[rowId * 5 + 0].Text = PointID.ToString();
+                panel.Controls[rowId * 5 + 1].Text = Date;
+                panel.Controls[rowId * 5 + 2].Text = Country;
+                panel.Controls[rowId * 5 + 3].Text = Sex;
+                panel.Controls[rowId * 5 + 4].Text = Age;
+            }
+        }
         private void button3_Click(object sender, EventArgs e)
         {
             NewPoint = new NewDataPoint(this);
             NewPoint.Show();
         }
-
         public void CommunicateParent(string Msg)
         {
             Parent.SendMsg(Msg);
@@ -153,6 +186,7 @@ namespace Client
             {
                 string deleteMsg = "Delete Data with ID: " + Data_ID;
                 CommunicateParent(deleteMsg);
+                clearRow(Int32.Parse(Data_ID));
             }
             else
             {

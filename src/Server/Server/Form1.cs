@@ -26,6 +26,7 @@ namespace Server
         public String text_to_send;
         public List<COVIDDataPoint> Rows;
         public List<COVIDDataPoint> Results;
+
         public Form1(List<COVIDDataPoint> data)
         {
             Rows = data;

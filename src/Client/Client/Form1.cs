@@ -32,6 +32,8 @@ namespace Client
         public ShowSpread SpreadVisualize;
         public Import ImportWindow;
         public List<COVIDDataPoint> Result;
+        public int TotalPointNum = 13479; // num of points (IDs) initially (better to query this from the server...)
+
         public Form1()
         {
             InitializeComponent();
@@ -103,7 +105,6 @@ namespace Client
                 {
                    IP = address.ToString();
                 }
-
             }
             client = new TcpClient();
             IPEndPoint IP_End = new IPEndPoint(IPAddress.Parse(IP), int.Parse(textBox1.Text)); //Use the same port as the server
@@ -178,6 +179,7 @@ namespace Client
         {
             if (client.Connected)
             {
+                int x;
                 STW.WriteLine(text_to_send);
                 this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Client Requests: " + text_to_send + "\n"); }));
             }

@@ -60,6 +60,9 @@ namespace Client
                 {
                     string Ret = "Update Data Point: " + ID + "," + Date + "," + Country + "," + Sex + "," + Age;
                     Parent.CommunicateParent(Ret);
+
+                    Parent.updateRow(Int32.Parse(ID), Date, Country, Sex, Age);
+
                     this.Close();
                 }
                 else
