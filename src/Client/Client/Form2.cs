@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Threading;
 
 namespace Client
 {
@@ -48,18 +49,19 @@ namespace Client
             panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
 
             DataPage.Controls.Add(panel);
-            panel.Controls.Add(new Label() { Text = "ID" }, 0, 0);
-            panel.Controls.Add(new Label() { Text = "Date" }, 1, 0);
-            panel.Controls.Add(new Label() { Text = "Country" }, 2, 0);
-            panel.Controls.Add(new Label() { Text = "Sex" }, 3, 0);
-            panel.Controls.Add(new Label() { Text = "Age" }, 4, 0);
+            panel.Controls.Add(new Label() { Text = "ID"        }, 0, 0);
+            panel.Controls.Add(new Label() { Text = "Date"      }, 1, 0);
+            panel.Controls.Add(new Label() { Text = "Country"   }, 2, 0);
+            panel.Controls.Add(new Label() { Text = "Sex"       }, 3, 0);
+            panel.Controls.Add(new Label() { Text = "Age"       }, 4, 0);
 
             // Fill with data
             foreach (COVIDDataPoint point in data)
             {
-                addRow(point.ID, point.Date, point.Country, point.Sex, point.Age);
+                addRow(new object(), new EventArgs(), point.ID, point.Date, point.Country, point.Sex, point.Age);
             }
         }
+
         public int getRowId(int PointID)
         {
             int rowId = -1;
@@ -88,53 +90,61 @@ namespace Client
 
             return rowId;
         }
-        public void clearRow(int PointID)
+
+        public void clearRow(object sender, EventArgs e, int PointID)
         {
             int rowId = getRowId(PointID);
-            if (rowId != -1)
-            {
-                panel.RowStyles[rowId].Height = 0;
 
-                for (int i = 0; i < 5; ++i)
-                {
-                    panel.Controls[rowId * 5 + i].Hide(); // Hide all 5 controls
-                }
+            panel.RowStyles[rowId].Height = 0;
+
+            for (int i = 0; i < 5; ++i)
+            {
+                panel.Controls[rowId * 5 + i].Hide(); // Hide all 5 controls
             }
+
+            genGraph(sender, e);
         }
-        public void addRow(int PointID, String Date, String Country, String Sex, String Age)
+
+        public void addRow(object sender, EventArgs e, int PointID, String Date, String Country, String Sex, String Age)
         {
             panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
 
             int rowNum = panel.RowCount;
-            panel.Controls.Add(new Label() { Text = PointID.ToString() }, 0, rowNum);
-            panel.Controls.Add(new Label() { Text = Date }, 1, rowNum);
-            panel.Controls.Add(new Label() { Text = Country }, 2, rowNum);
-            panel.Controls.Add(new Label() { Text = Sex }, 3, rowNum);
-            panel.Controls.Add(new Label() { Text = Age }, 4, rowNum);
+            panel.Controls.Add(new Label() { Text = PointID.ToString()  }, 0, rowNum);
+            panel.Controls.Add(new Label() { Text = Date                }, 1, rowNum);
+            panel.Controls.Add(new Label() { Text = Country             }, 2, rowNum);
+            panel.Controls.Add(new Label() { Text = Sex                 }, 3, rowNum);
+            panel.Controls.Add(new Label() { Text = Age                 }, 4, rowNum);
 
             panel.RowCount += 1;
+
+            genGraph(sender, e);
         }
-        public void updateRow(int PointID, String Date, String Country, String Sex, String Age)
+
+        public void updateRow(object sender, EventArgs e, int PointID, String Date, String Country, String Sex, String Age)
         {
             int rowId = getRowId(PointID);
-            if (rowId != -1)
-            {
-                panel.Controls[rowId * 5 + 0].Text = PointID.ToString();
-                panel.Controls[rowId * 5 + 1].Text = Date;
-                panel.Controls[rowId * 5 + 2].Text = Country;
-                panel.Controls[rowId * 5 + 3].Text = Sex;
-                panel.Controls[rowId * 5 + 4].Text = Age;
-            }
+
+            panel.Controls[rowId * 5 + 0].Text = PointID.ToString();
+            panel.Controls[rowId * 5 + 1].Text = Date;
+            panel.Controls[rowId * 5 + 2].Text = Country;
+            panel.Controls[rowId * 5 + 3].Text = Sex;
+            panel.Controls[rowId * 5 + 4].Text = Age;
+
+            genGraph(sender, e);
         }
+
         private void button3_Click(object sender, EventArgs e)
         {
             NewPoint = new NewDataPoint(this);
             NewPoint.Show();
         }
+
         public void CommunicateParent(string Msg)
         {
             Parent.SendMsg(Msg);
         }
+
         private void button2_Click(object sender, EventArgs e)
         {
             StringBuilder csvExport = new StringBuilder();
@@ -186,7 +196,7 @@ namespace Client
             {
                 string deleteMsg = "Delete Data with ID: " + Data_ID;
                 CommunicateParent(deleteMsg);
-                clearRow(Int32.Parse(Data_ID));
+                clearRow(sender, e, Int32.Parse(Data_ID));
             }
             else
             {
@@ -323,7 +333,7 @@ namespace Client
 
         }
 
-        private void button7_Click(object sender, EventArgs e)
+        private void genGraph(object sender, EventArgs e)
         {
             bool meanDiff = false;
             chart1.Series["Series1"].Points.Clear();
@@ -357,7 +367,7 @@ namespace Client
                 }
             }
             else if (comboBox1.Text == "Age")
-            { 
+            {
                 meanDiff = true;
                 foreach (COVIDDataPoint point in Result)
                 {
@@ -368,7 +378,7 @@ namespace Client
             Yaxis = Yaxis_calculations(Xaxis);
             List<String> Unique = new List<String>();
             Unique = Xaxis.Distinct().ToList();
-            for(int i = 0; i < Unique.Count; i++)
+            for (int i = 0; i < Unique.Count; i++)
             {
                 chart1.Series["Series1"].Points.AddXY(Unique[i], Yaxis[i]);
             }
@@ -386,7 +396,7 @@ namespace Client
             for (int i = 0; i < Unique.Count; i++)
             {
                 total += Yaxis[i];
-                if(max < Yaxis[i])
+                if (max < Yaxis[i])
                 {
                     max = Yaxis[i];
                     pos = i;
@@ -395,9 +405,9 @@ namespace Client
             double mean = 0;
             textBox5.Text = Unique[pos];
             textBox6.Text = Xaxis[total / 2];
-            if(meanDiff)
+            if (meanDiff)
             {
-                foreach(string age in Xaxis)
+                foreach (string age in Xaxis)
                 {
                     mean += int.Parse(age);
                 }
@@ -406,6 +416,11 @@ namespace Client
             }
             else
                 textBox7.Text = Xaxis[total / 2];
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            genGraph(sender, e);
         }
 
         List<int> Yaxis_calculations(List<String> Xaxis)

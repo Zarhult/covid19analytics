@@ -179,7 +179,6 @@ namespace Client
         {
             if (client.Connected)
             {
-                int x;
                 STW.WriteLine(text_to_send);
                 this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Client Requests: " + text_to_send + "\n"); }));
             }
