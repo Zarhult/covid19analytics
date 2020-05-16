@@ -61,7 +61,7 @@ namespace Client
                     string Ret = "New Data Point: " + Date + "," + Country + "," + Sex + "," + Age;
                     Parent.CommunicateParent(Ret);
 
-                    Parent.addRow(new object(), new EventArgs(), PointID, Date, Country, Sex, Age);
+                    Parent.addRow(PointID, Date, Country, Sex, Age);
 
                     COVIDDataPoint newPoint = new COVIDDataPoint();
                     newPoint.ID = PointID;

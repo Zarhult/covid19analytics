@@ -58,7 +58,7 @@ namespace Client
             // Fill with data
             foreach (COVIDDataPoint point in data)
             {
-                addRow(new object(), new EventArgs(), point.ID, point.Date, point.Country, point.Sex, point.Age);
+                addRow(point.ID, point.Date, point.Country, point.Sex, point.Age);
             }
         }
 
@@ -91,7 +91,7 @@ namespace Client
             return rowId;
         }
 
-        public void clearRow(object sender, EventArgs e, int PointID)
+        public void clearRow(int PointID)
         {
             int rowId = getRowId(PointID);
 
@@ -102,10 +102,10 @@ namespace Client
                 panel.Controls[rowId * 5 + i].Hide(); // Hide all 5 controls
             }
 
-            genGraph(sender, e);
+            genGraph();
         }
 
-        public void addRow(object sender, EventArgs e, int PointID, String Date, String Country, String Sex, String Age)
+        public void addRow(int PointID, String Date, String Country, String Sex, String Age)
         {
             panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
 
@@ -118,10 +118,10 @@ namespace Client
 
             panel.RowCount += 1;
 
-            genGraph(sender, e);
+            genGraph();
         }
 
-        public void updateRow(object sender, EventArgs e, int PointID, String Date, String Country, String Sex, String Age)
+        public void updateRow(int PointID, String Date, String Country, String Sex, String Age)
         {
             int rowId = getRowId(PointID);
 
@@ -131,7 +131,7 @@ namespace Client
             panel.Controls[rowId * 5 + 3].Text = Sex;
             panel.Controls[rowId * 5 + 4].Text = Age;
 
-            genGraph(sender, e);
+            genGraph();
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -196,7 +196,7 @@ namespace Client
             {
                 string deleteMsg = "Delete Data with ID: " + Data_ID;
                 CommunicateParent(deleteMsg);
-                clearRow(sender, e, Int32.Parse(Data_ID));
+                clearRow(Int32.Parse(Data_ID));
             }
             else
             {
@@ -333,7 +333,7 @@ namespace Client
 
         }
 
-        private void genGraph(object sender, EventArgs e)
+        private void genGraph()
         {
             bool meanDiff = false;
             chart1.Series["Series1"].Points.Clear();
@@ -420,7 +420,7 @@ namespace Client
 
         private void button7_Click(object sender, EventArgs e)
         {
-            genGraph(sender, e);
+            genGraph();
         }
 
         List<int> Yaxis_calculations(List<String> Xaxis)
