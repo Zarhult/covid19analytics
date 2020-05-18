@@ -26,6 +26,7 @@ namespace Server
         public String text_to_send;
         public List<COVIDDataPoint> Rows;
         public List<COVIDDataPoint> Results;
+        public Dictionary<string, string> maps = new Dictionary<string, string>();
         public Form1(List<COVIDDataPoint> data)
         {
             Rows = data;
@@ -39,23 +40,26 @@ namespace Server
             String[] values = matchCommas.Split(recieve);
             int ret = 0;
             string rets = "";
+            string r = "";
+            
             foreach (COVIDDataPoint point in Rows)
-            {
-                if (values[0].Length > 0 && values[1].Length > 0 && Rows.Count() > 100)
                 {
-                    if (DateSearch(values[0].ToString(), point.Date.ToString()) && AgeSearch(values[1].ToString(), point.Age.ToString())
-                        && GenderSearch(values[2].ToString(), point.Sex.ToString()) && CountrySearch(values[3].ToString(), point.Country.ToString()))
+                    if (values[0].Length > 0 && values[1].Length > 0 && Rows.Count() > 100)
                     {
-                        rets += point.ID.ToString() + ",";
-                        rets += (point.Date != "") ? point.Date + "," : " ,";
-                        rets += (point.Country != "") ? point.Country + "," : " ,";
-                        rets += (point.Sex != "") ? point.Sex + "," : " ,";
-                        rets += (point.Age != "") ? point.Age + "," : " ,";
-                        ret++;
+                        if (DateSearch(values[0].ToString(), point.Date.ToString()) && AgeSearch(values[1].ToString(), point.Age.ToString())
+                            && GenderSearch(values[2].ToString(), point.Sex.ToString()) && CountrySearch(values[3].ToString(), point.Country.ToString()))
+                        {
+                            rets += point.ID.ToString() + ",";
+                            rets += (point.Date != "") ? point.Date + "," : " ,";
+                            rets += (point.Country != "") ? point.Country + "," : " ,";
+                            rets += (point.Sex != "") ? point.Sex + "," : " ,";
+                            rets += (point.Age != "") ? point.Age + "," : " ,";
+                            ret++;
+                        }
                     }
                 }
-            }
-            return ret.ToString() + "," + rets;
+                return ret.ToString() + "," + rets;
+            //}
         }
         public bool DateSearch(String Date, String COVIDDate)
         {

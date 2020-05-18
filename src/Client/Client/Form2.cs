@@ -23,73 +23,87 @@ namespace Client
         public List<String> X;
         public List<int> Y;
         public String GraphType;
+        public Dictionary<List<COVIDDataPoint>, TableLayoutPanel> mapTable = new Dictionary<List<COVIDDataPoint>, TableLayoutPanel>();//J
 
-        public Form2(Form1 ParentForm, List<COVIDDataPoint> data)
+        public Form2(Form1 ParentForm, List<COVIDDataPoint> data)//, Dictionary<List<COVIDDataPoint>, TableLayoutPanel> table)
         {
             InitializeComponent();
             Result = data;
             Parent = ParentForm;
             tabControl1.SelectTab("tabPage1");
             DataPage = tabControl1.SelectedTab;
-            // Initialize data view table
-            panel = new TableLayoutPanel();
-            panel.Location = new System.Drawing.Point(88, 100);
-            panel.Name = "TableLayoutPanel1";
-            panel.Size = new System.Drawing.Size(624, 279);
-            panel.TabIndex = 0;
-            panel.ColumnCount = 5;
-            panel.RowCount = 1;
-            panel.AutoScroll = true;
 
-            panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
-            panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
-            panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
-
-            DataPage.Controls.Add(panel);
-            panel.Controls.Add(new Label() { Text = "ID" }, 0, 0);
-            panel.Controls.Add(new Label() { Text = "Date" }, 1, 0);
-            panel.Controls.Add(new Label() { Text = "Country" }, 2, 0);
-            panel.Controls.Add(new Label() { Text = "Sex" }, 3, 0);
-            panel.Controls.Add(new Label() { Text = "Age" }, 4, 0);
-
-            // Fill with data
-            int row = 1;
-
-            foreach (COVIDDataPoint point in data)
+            /*if (Form1.global.value.TryGetValue(data, out panel))
             {
-                panel.RowCount += 1;
+                MessageBox.Show("Entered: key exists");
+                
+            }//J
+
+            else
+            {*/
+                //MessageBox.Show("NOT Entered: key doesnt exist");
+                //Initialize data view table
+                panel = new TableLayoutPanel();
+                panel.Location = new System.Drawing.Point(88, 100);
+                panel.Name = "TableLayoutPanel1";
+                panel.Size = new System.Drawing.Size(624, 279);
+                panel.TabIndex = 0;
+                panel.ColumnCount = 5;
+                panel.RowCount = 1;
+                panel.AutoScroll = true;
+
+                panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
+                panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
+                panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
                 panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
 
-                for (int i = 0; i <= 4; ++i)
+                DataPage.Controls.Add(panel);
+                panel.Controls.Add(new Label() { Text = "ID" }, 0, 0);
+                panel.Controls.Add(new Label() { Text = "Date" }, 1, 0);
+                panel.Controls.Add(new Label() { Text = "Country" }, 2, 0);
+                panel.Controls.Add(new Label() { Text = "Sex" }, 3, 0);
+                panel.Controls.Add(new Label() { Text = "Age" }, 4, 0);
+
+                // Fill with data
+                int row = 1;
+
+                foreach (COVIDDataPoint point in data)
                 {
-                    switch (i)
+                    panel.RowCount += 1;
+                    panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
+
+                    for (int i = 0; i <= 4; ++i)
                     {
-                        case 0:
-                            panel.Controls.Add(new Label() { Text = point.ID.ToString() }, i, row);
-                            break;
+                        switch (i)
+                        {
+                            case 0:
+                                panel.Controls.Add(new Label() { Text = point.ID.ToString() }, i, row);
+                                break;
 
-                        case 1:
-                            panel.Controls.Add(new Label() { Text = point.Date }, i, row);
-                            break;
+                            case 1:
+                                panel.Controls.Add(new Label() { Text = point.Date }, i, row);
+                                break;
 
-                        case 2:
-                            panel.Controls.Add(new Label() { Text = point.Country }, i, row);
-                            break;
+                            case 2:
+                                panel.Controls.Add(new Label() { Text = point.Country }, i, row);
+                                break;
 
-                        case 3:
-                            panel.Controls.Add(new Label() { Text = point.Sex }, i, row);
-                            break;
+                            case 3:
+                                panel.Controls.Add(new Label() { Text = point.Sex }, i, row);
+                                break;
 
-                        case 4:
-                            panel.Controls.Add(new Label() { Text = point.Age }, i, row);
-                            break;
+                            case 4:
+                                panel.Controls.Add(new Label() { Text = point.Age }, i, row);
+                                break;
+                        }
                     }
+                    
+                    ++row;
                 }
 
-                ++row;
-            }
-
+              //  Form1.global.value.Add(data, panel);
+                //MessageBox.Show("Added table");
+            //}
         }
 
         private void button3_Click(object sender, EventArgs e)

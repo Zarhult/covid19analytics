@@ -62,3 +62,14 @@ C:\Users\User\Documents\Spring 2020\CS 180\Versions\Sprint 4-2\qttest-DataDispla
 C:\Users\User\Documents\Spring 2020\CS 180\Versions\Sprint 4-2\qttest-DataDisplay\src\Server\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
 C:\Users\User\Documents\Spring 2020\CS 180\Versions\Sprint 4-2\qttest-DataDisplay\src\Server\Server\obj\Debug\Server.exe
 C:\Users\User\Documents\Spring 2020\CS 180\Versions\Sprint 4-2\qttest-DataDisplay\src\Server\Server\obj\Debug\Server.pdb
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\bin\Debug\Server.exe.config
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\bin\Debug\Server.exe
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\bin\Debug\Server.pdb
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\obj\Debug\Server.csprojAssemblyReference.cache
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\obj\Debug\Server.Form1.resources
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\obj\Debug\Server.Form2.resources
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\obj\Debug\Server.Properties.Resources.resources
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\obj\Debug\Server.csproj.GenerateResource.cache
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\obj\Debug\Server.exe
+C:\Users\Joshua\Source\Repos\qttest_fastersearch\src\Server\Server\obj\Debug\Server.pdb

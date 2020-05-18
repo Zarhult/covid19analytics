@@ -15,7 +15,7 @@ using System.IO;
 
 namespace Client
 {
-
+    
     public partial class Form1 : Form
     {
         private TcpClient client;
@@ -32,6 +32,7 @@ namespace Client
         public ShowSpread SpreadVisualize;
         public Import ImportWindow;
         public List<COVIDDataPoint> Result;
+        public Dictionary<string, List<COVIDDataPoint>> map = new Dictionary<string, List<COVIDDataPoint>>();
         public Form1()
         {
             InitializeComponent();
@@ -133,37 +134,48 @@ namespace Client
             {
                 try
                 {
-                    recieve = STR.ReadLine();
-                    Regex matchComma = new Regex(",");
-                    String[] Results = matchComma.Split(recieve);
-                    int numOfResults = Int32.Parse(Results[0]);
-                    if(numOfResults == 0)
-                    {
-                        recieve = "There are no Data points with the given Search";
-                        this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
-                    }
-                    else
-                    {
-                        int numOfPoints = 5 * numOfResults;
-                        List<COVIDDataPoint> SearchResults = new List<COVIDDataPoint>();
-                        for(int i = 1; i < numOfPoints; i += 5)
+                        recieve = STR.ReadLine();
+                        Regex matchComma = new Regex(",");
+                        String[] Results = matchComma.Split(recieve);
+                        int numOfResults = Int32.Parse(Results[0]);
+                        if (numOfResults == 0)
                         {
-                            COVIDDataPoint point = new COVIDDataPoint();
-                            point.ID = Int32.Parse(Results[i]);
-                            point.Date = Results[i+1];
-                            point.Country = Results[i + 2];
-                            point.Sex = Results[i + 3];
-                            point.Age = Results[i + 4];
-                            SearchResults.Add(point);
+                            recieve = "There are no Data points with the given Search";
+                            this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
                         }
-                        Result = SearchResults;
-                        recieve = "There are " + numOfResults.ToString() + " Results for the specific Search";
-                        this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
-                        // PROBLEM: "country" is missing from most of the data in Result
-                        //DataTable.Close();
-                        DataTable = new Form2(this, Result);
-                        Application.Run(DataTable);
-                    }
+                         else if (map.TryGetValue(text_to_send, out Result))//
+                         {
+                             recieve = "There are " + numOfResults.ToString() + " Results for the specific Search";
+                             this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
+                             // PROBLEM: "country" is missing from most of the data in Result
+                             //DataTable.Close();
+                             DataTable = new Form2(this, Result);
+                             Application.Run(DataTable);
+                         }//J*/
+                        else { 
+                            int numOfPoints = 5 * numOfResults;
+                            List<COVIDDataPoint> SearchResults = new List<COVIDDataPoint>();
+                            for (int i = 1; i < numOfPoints; i += 5)
+                            {
+                                COVIDDataPoint point = new COVIDDataPoint();
+                                point.ID = Int32.Parse(Results[i]);
+                                point.Date = Results[i + 1];
+                                point.Country = Results[i + 2];
+                                point.Sex = Results[i + 3];
+                                point.Age = Results[i + 4];
+                                SearchResults.Add(point);
+                            }
+                            Result = SearchResults;
+                            recieve = "There are " + numOfResults.ToString() + " Results for the specific Search";
+                            this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
+                            // PROBLEM: "country" is missing from most of the data in Result
+                            //DataTable.Close();
+                            DataTable = new Form2(this, Result);
+                            map.Add(text_to_send, Result); //J
+                            Application.Run(DataTable);
+
+                        }
+
                     recieve = "";
 
                 }
