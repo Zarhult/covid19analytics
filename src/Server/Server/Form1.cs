@@ -16,7 +16,7 @@ using System.IO;
 
 namespace Server
 {
-
+    
     public partial class Form1 : Form
     {
         private TcpClient client;
@@ -26,10 +26,14 @@ namespace Server
         public String text_to_send;
         public List<COVIDDataPoint> Rows;
         public List<COVIDDataPoint> Results;
+        public List<String> Search_Results;
+        public List<int> HashTable;
 
         public Form1(List<COVIDDataPoint> data)
         {
             Rows = data;
+            Search_Results = new List<string>();
+            HashTable = new List<int>();
             InitializeComponent();
 
         }
@@ -183,6 +187,8 @@ namespace Server
                     recieve = STR.ReadLine();
 
                     this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Client Requests: " + recieve + "\n"); })); //recieve is the request <--
+
+
                     //text_to_send = "There are ";
                     string search = "";
                     if (recieve.Substring(0,3) == "New")
@@ -208,8 +214,42 @@ namespace Server
                     }
                     else
                     {
-                        search = SearchAlgo(recieve);
-                        text_to_send = search;
+                        List<int> HashTableTemp = new List<int>();
+                        List<String> Search_ResultTemp = new List<String>();
+                        HashTableTemp = HashTable;
+                        Search_ResultTemp = Search_Results;
+                        int hash = recieve.GetHashCode();
+                        int pos = 0;
+                        if(pos < HashTableTemp.Count)
+                        {
+                            while (pos < HashTableTemp.Count)
+                            {
+                                if (HashTableTemp[pos] == hash)
+                                    break;
+                                pos++;
+
+                            }
+                            if (pos >= HashTableTemp.Count)
+                            {
+                                HashTableTemp.Add(hash);
+                                search = SearchAlgo(recieve);
+                                Search_ResultTemp.Add(search);
+                                text_to_send = search;
+                            }
+                            else
+                            {
+                                text_to_send = Search_Results[pos];
+                            }
+                        }
+                        else
+                        {
+                            HashTableTemp.Add(hash);
+                            search = SearchAlgo(recieve);
+                            Search_ResultTemp.Add(search);
+                            text_to_send = search;
+                        }
+                        HashTable = HashTableTemp;
+                        Search_Results = Search_ResultTemp;
                     }
                     backgroundWorker2.RunWorkerAsync();
                     recieve = "";

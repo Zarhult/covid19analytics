@@ -17,6 +17,7 @@ namespace Client
         private TableLayoutPanel panel;
         private TabPage DataPage;
         public List<COVIDDataPoint> Result;
+        public int page;
         public Form1 Parent;
         public NewDataPoint NewPoint;
         public UpdateDataPoint UpdatePoint;
@@ -56,10 +57,17 @@ namespace Client
             panel.Controls.Add(new Label() { Text = "Age"       }, 4, 0);
 
             // Fill with data
-            foreach (COVIDDataPoint point in data)
-            {
-                addRow(point.ID, point.Date, point.Country, point.Sex, point.Age);
-            }
+            if(data.Count < 100)
+                foreach (COVIDDataPoint point in data)
+                {
+                    addRow(point.ID, point.Date, point.Country, point.Sex, point.Age);
+                }
+            else
+                for(int i = 0; i < 100; i++)
+                {
+                    addRow(data[i].ID, data[i].Date, data[i].Country, data[i].Sex, data[i].Age);
+                }
+            page = 1;
         }
 
         public int getRowId(int PointID)
@@ -440,6 +448,160 @@ namespace Client
                 ret.Add(count);
             }
             return ret;
+        }
+
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            if(page > 1)
+            {
+                page--;
+                int j = 0;
+                for(int i = 100*(page-1); i < 100*page; i++)
+                {
+                    panel.Controls[j * 5 + 0].Text = Result[i].ID.ToString();
+                    panel.Controls[j * 5 + 1].Text = Result[i].Date;
+                    panel.Controls[j * 5 + 2].Text = Result[i].Country;
+                    panel.Controls[j * 5 + 3].Text = Result[i].Sex;
+                    panel.Controls[j * 5 + 4].Text = Result[i].Age;
+                    j++;
+                }
+
+            }
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            if((page+1)*100 < Result.Count)
+            {
+                int j = 0;
+                for (int i = 100 * page; i < 100 * (page + 1); i++)
+                {
+                    panel.Controls[j * 5 + 0].Text = Result[i].ID.ToString();
+                    panel.Controls[j * 5 + 1].Text = Result[i].Date;
+                    panel.Controls[j * 5 + 2].Text = Result[i].Country;
+                    panel.Controls[j * 5 + 3].Text = Result[i].Sex;
+                    panel.Controls[j * 5 + 4].Text = Result[i].Age;
+                    j++;
+                }
+                page++;
+            }
+            else if(Result.Count - (page)*100 > 0)
+            {
+                int j = 0;
+                for (int i = 100 * page; i < Result.Count; i++)
+                {
+                    panel.Controls[j * 5 + 0].Text = Result[i].ID.ToString();
+                    panel.Controls[j * 5 + 1].Text = Result[i].Date;
+                    panel.Controls[j * 5 + 2].Text = Result[i].Country;
+                    panel.Controls[j * 5 + 3].Text = Result[i].Sex;
+                    panel.Controls[j * 5 + 4].Text = Result[i].Age;
+                    j++;
+                }
+                page++;
+            }
+
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            int maleCount = 0;
+            int femaleCount = 0;
+            foreach (COVIDDataPoint point in Result)
+            {
+                if (point.Sex == "male")
+                    maleCount++;
+                else if (point.Sex == "female")
+                    femaleCount++;
+            }
+            string answer = (maleCount > femaleCount) ? "Men: " + maleCount.ToString() : "Women: " + femaleCount.ToString();
+            label10.Text = answer;
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            String type = comboBox2.Text;
+            decimal top = numericUpDown1.Value;
+            List<String> typeIN = new List<String>();
+            foreach (COVIDDataPoint point in Result)
+            {
+                if(type == "Month")
+                {
+                    typeIN.Add(point.Date[3].ToString() + point.Date[4].ToString());
+                }
+                else if (type == "Country")
+                {
+                    typeIN.Add(point.Country);
+                }
+                else if (type == "Age Group")
+                {
+                    typeIN.Add(point.Age);
+                }
+            }
+            List<string> Unique = typeIN.Distinct().ToList();
+
+            List<int> UniqueVals = new List<int>();
+            int count;
+            for (int i = 0; i < Unique.Count; i++)
+            {
+                count = 0;
+                for (int j = 0; j < typeIN.Count; j++)
+                {
+                    if (Unique[i] == typeIN[j])
+                        count++;
+                }
+                UniqueVals.Add(count);
+            }
+            int max = 0;
+            int pos = 0;
+            String Answer = "";
+            if (top < UniqueVals.Count)
+            {
+                for (int i = 0; i < top; i++)
+                {
+                    max = 0;
+                    pos = 0;
+                    for (int j = 0; j < UniqueVals.Count; j++)
+                    {
+                        if (max < UniqueVals[j])
+                        {
+                            pos = j;
+                            max = UniqueVals[j];
+                        }
+                    }
+                    Answer += ((i + 1).ToString() + ". " + Unique[pos] + "\n ");
+                    UniqueVals.RemoveAt(pos);
+                    Unique.RemoveAt(pos);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < UniqueVals.Count; i++)
+                {
+                    max = 0;
+                    pos = 0;
+                    for (int j = 0; j < UniqueVals.Count; j++)
+                    {
+                        if (max < UniqueVals[j])
+                        {
+                            pos = j;
+                            max = UniqueVals[j];
+                        }
+                    }
+                    Answer += ((i + 1).ToString() + ". " + Unique[pos] + "\n ");
+                    UniqueVals.RemoveAt(pos);
+                    Unique.RemoveAt(pos);
+                }
+                for(int i = UniqueVals.Count; i < top; i++)
+                {
+                    Answer += ((i+1).ToString() + ". " + "\n ");
+                }
+            }
+            if(Result.Count > 1000)
+                System.Threading.Thread.Sleep(Result.Count);
+            else
+                System.Threading.Thread.Sleep(Result.Count * 10);
+            textBox8.Text = Answer;
         }
     }
 }

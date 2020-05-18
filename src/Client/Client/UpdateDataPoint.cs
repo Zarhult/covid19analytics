@@ -75,5 +75,10 @@ namespace Client
                 MessageBox.Show("Invalid Date");
             }
         }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
