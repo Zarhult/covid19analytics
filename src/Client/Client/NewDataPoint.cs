@@ -48,6 +48,8 @@ namespace Client
         }
         private void button1_Click(object sender, EventArgs e)
         {
+            int PointID = ++Parent.Parent.TotalPointNum;
+            
             string Date = textBox2.Text;
             string Age = textBox1.Text;
             string Sex = comboBox2.Text;
@@ -58,6 +60,17 @@ namespace Client
                 {
                     string Ret = "New Data Point: " + Date + "," + Country + "," + Sex + "," + Age;
                     Parent.CommunicateParent(Ret);
+
+                    Parent.addRow(PointID, Date, Country, Sex, Age);
+
+                    COVIDDataPoint newPoint = new COVIDDataPoint();
+                    newPoint.ID = PointID;
+                    newPoint.Date = Date;
+                    newPoint.Country = Country;
+                    newPoint.Sex = Sex;
+                    newPoint.Age = Age;
+                    Parent.Parent.Result.Add(newPoint); ;
+
                     this.Close();
                 }
                 else

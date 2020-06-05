@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Threading;
 
 namespace Client
 {
@@ -16,6 +17,7 @@ namespace Client
         private TableLayoutPanel panel;
         private TabPage DataPage;
         public List<COVIDDataPoint> Result;
+        public int page;
         public Form1 Parent;
         public NewDataPoint NewPoint;
         public UpdateDataPoint UpdatePoint;
@@ -23,6 +25,7 @@ namespace Client
         public List<String> X;
         public List<int> Y;
         public String GraphType;
+
 
         public Form2(Form1 ParentForm, List<COVIDDataPoint> data)
         {
@@ -47,49 +50,90 @@ namespace Client
             panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
 
             DataPage.Controls.Add(panel);
-            panel.Controls.Add(new Label() { Text = "ID" }, 0, 0);
-            panel.Controls.Add(new Label() { Text = "Date" }, 1, 0);
-            panel.Controls.Add(new Label() { Text = "Country" }, 2, 0);
-            panel.Controls.Add(new Label() { Text = "Sex" }, 3, 0);
-            panel.Controls.Add(new Label() { Text = "Age" }, 4, 0);
+            panel.Controls.Add(new Label() { Text = "ID"        }, 0, 0);
+            panel.Controls.Add(new Label() { Text = "Date"      }, 1, 0);
+            panel.Controls.Add(new Label() { Text = "Country"   }, 2, 0);
+            panel.Controls.Add(new Label() { Text = "Sex"       }, 3, 0);
+            panel.Controls.Add(new Label() { Text = "Age"       }, 4, 0);
 
             // Fill with data
-            int row = 1;
-
-            foreach (COVIDDataPoint point in data)
-            {
-                panel.RowCount += 1;
-                panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
-
-                for (int i = 0; i <= 4; ++i)
+            if(data.Count < 100)
+                foreach (COVIDDataPoint point in data)
                 {
-                    switch (i)
+                    addRow(point.ID, point.Date, point.Country, point.Sex, point.Age);
+                }
+            else
+                for(int i = 0; i < 100; i++)
+                {
+                    addRow(data[i].ID, data[i].Date, data[i].Country, data[i].Sex, data[i].Age);
+                }
+            page = 1;
+        }
+
+        public int getRowId(int PointID)
+        {
+            int rowId = -1;
+
+            try
+            {
+                for (int i = 0; i < panel.Controls.Count; i += 5) // i += 5 because 5 controls per row
+                {
+                    var control = panel.Controls[i];
+
+                    if (control is Label && ((Label)control).Text == PointID.ToString())
                     {
-                        case 0:
-                            panel.Controls.Add(new Label() { Text = point.ID.ToString() }, i, row);
-                            break;
-
-                        case 1:
-                            panel.Controls.Add(new Label() { Text = point.Date }, i, row);
-                            break;
-
-                        case 2:
-                            panel.Controls.Add(new Label() { Text = point.Country }, i, row);
-                            break;
-
-                        case 3:
-                            panel.Controls.Add(new Label() { Text = point.Sex }, i, row);
-                            break;
-
-                        case 4:
-                            panel.Controls.Add(new Label() { Text = point.Age }, i, row);
-                            break;
+                        rowId = i / 5;
                     }
                 }
 
-                ++row;
+                if (rowId == -1) // Failure
+                {
+                    throw new System.Exception("getRowId failed.");
+                }
+            }
+            catch (Exception x)
+            {
+                MessageBox.Show(x.Message.ToString());
             }
 
+            return rowId;
+        }
+
+        public void clearRow(int PointID)
+        {
+            int rowId = getRowId(PointID);
+
+            panel.RowStyles[rowId].Height = 0;
+
+            for (int i = 0; i < 5; ++i)
+            {
+                panel.Controls[rowId * 5 + i].Hide(); // Hide all 5 controls
+            }
+        }
+
+        public void addRow(int PointID, String Date, String Country, String Sex, String Age)
+        {
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50F));
+
+            int rowNum = panel.RowCount;
+            panel.Controls.Add(new Label() { Text = PointID.ToString()  }, 0, rowNum);
+            panel.Controls.Add(new Label() { Text = Date                }, 1, rowNum);
+            panel.Controls.Add(new Label() { Text = Country             }, 2, rowNum);
+            panel.Controls.Add(new Label() { Text = Sex                 }, 3, rowNum);
+            panel.Controls.Add(new Label() { Text = Age                 }, 4, rowNum);
+
+            panel.RowCount += 1;
+        }
+
+        public void updateRow(int PointID, String Date, String Country, String Sex, String Age)
+        {
+            int rowId = getRowId(PointID);
+
+            panel.Controls[rowId * 5 + 0].Text = PointID.ToString();
+            panel.Controls[rowId * 5 + 1].Text = Date;
+            panel.Controls[rowId * 5 + 2].Text = Country;
+            panel.Controls[rowId * 5 + 3].Text = Sex;
+            panel.Controls[rowId * 5 + 4].Text = Age;
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -102,6 +146,7 @@ namespace Client
         {
             Parent.SendMsg(Msg);
         }
+
         private void button2_Click(object sender, EventArgs e)
         {
             StringBuilder csvExport = new StringBuilder();
@@ -151,8 +196,16 @@ namespace Client
             }
             if (Found)
             {
-                string deleteMsg = "Delete Data with ID: " + Data_ID;
-                CommunicateParent(deleteMsg);
+                var confirmResult = MessageBox.Show("Are you sure to delete?",
+                                     "Confirm Delete!!",
+                                     MessageBoxButtons.YesNo);
+                if(confirmResult == DialogResult.Yes)
+                {
+                    string deleteMsg = "Delete Data with ID: " + Data_ID;
+                    CommunicateParent(deleteMsg);
+                    clearRow(Int32.Parse(Data_ID));
+                }
+                
             }
             else
             {
@@ -289,9 +342,10 @@ namespace Client
 
         }
 
-        private void button7_Click(object sender, EventArgs e)
+        private void genGraph()
         {
             bool meanDiff = false;
+            string countries = Parent.countries.Replace(" ", "");
             chart1.Series["Series1"].Points.Clear();
             GraphType = comboBox3.Text;
             int n;
@@ -310,7 +364,8 @@ namespace Client
             {
                 foreach (COVIDDataPoint point in Result)
                 {
-                    if (point.Country != "" && point.Country != " ")
+                    if(countries.Contains(point.Country))
+                        
                         Xaxis.Add(point.Country);
                 }
             }
@@ -318,23 +373,23 @@ namespace Client
             {
                 foreach (COVIDDataPoint point in Result)
                 {
-                    if (point.Sex != "" && point.Sex != " ")
-                        Xaxis.Add(point.Sex);
+                    if (point.Sex.ToLower() == "male" || point.Sex.ToLower() == "female")
+                            Xaxis.Add(point.Sex.ToLower());
                 }
             }
             else if (comboBox1.Text == "Age")
-            { 
+            {
                 meanDiff = true;
                 foreach (COVIDDataPoint point in Result)
                 {
-                    if (point.Age != "" && point.Age != " " && int.TryParse(point.Age, out n))
+                    if (point.Age != "" && point.Age != " " && Parent.ageCheck(point.Age))
                         Xaxis.Add(point.Age);
                 }
             }
             Yaxis = Yaxis_calculations(Xaxis);
             List<String> Unique = new List<String>();
             Unique = Xaxis.Distinct().ToList();
-            for(int i = 0; i < Unique.Count; i++)
+            for (int i = 0; i < Unique.Count; i++)
             {
                 chart1.Series["Series1"].Points.AddXY(Unique[i], Yaxis[i]);
             }
@@ -352,7 +407,7 @@ namespace Client
             for (int i = 0; i < Unique.Count; i++)
             {
                 total += Yaxis[i];
-                if(max < Yaxis[i])
+                if (max < Yaxis[i])
                 {
                     max = Yaxis[i];
                     pos = i;
@@ -361,9 +416,9 @@ namespace Client
             double mean = 0;
             textBox5.Text = Unique[pos];
             textBox6.Text = Xaxis[total / 2];
-            if(meanDiff)
+            if (meanDiff)
             {
-                foreach(string age in Xaxis)
+                foreach (string age in Xaxis)
                 {
                     mean += int.Parse(age);
                 }
@@ -372,6 +427,11 @@ namespace Client
             }
             else
                 textBox7.Text = Xaxis[total / 2];
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            genGraph();
         }
 
         List<int> Yaxis_calculations(List<String> Xaxis)
@@ -391,6 +451,272 @@ namespace Client
                 ret.Add(count);
             }
             return ret;
+        }
+
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            if(page > 1)
+            {
+                page--;
+                int j = 0;
+                for(int i = 100*(page-1); i < 100*page; i++)
+                {
+                    panel.Controls[j * 5 + 0].Text = Result[i].ID.ToString();
+                    panel.Controls[j * 5 + 1].Text = Result[i].Date;
+                    panel.Controls[j * 5 + 2].Text = Result[i].Country;
+                    panel.Controls[j * 5 + 3].Text = Result[i].Sex;
+                    panel.Controls[j * 5 + 4].Text = Result[i].Age;
+                    j++;
+                }
+
+            }
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            if((page+1)*100 < Result.Count)
+            {
+                int j = 0;
+                for (int i = 100 * page; i < 100 * (page + 1); i++)
+                {
+                    panel.Controls[j * 5 + 0].Text = Result[i].ID.ToString();
+                    panel.Controls[j * 5 + 1].Text = Result[i].Date;
+                    panel.Controls[j * 5 + 2].Text = Result[i].Country;
+                    panel.Controls[j * 5 + 3].Text = Result[i].Sex;
+                    panel.Controls[j * 5 + 4].Text = Result[i].Age;
+                    j++;
+                }
+                page++;
+            }
+            else if(Result.Count - (page)*100 > 0)
+            {
+                int j = 0;
+                for (int i = 100 * page; i < Result.Count; i++)
+                {
+                    panel.Controls[j * 5 + 0].Text = Result[i].ID.ToString();
+                    panel.Controls[j * 5 + 1].Text = Result[i].Date;
+                    panel.Controls[j * 5 + 2].Text = Result[i].Country;
+                    panel.Controls[j * 5 + 3].Text = Result[i].Sex;
+                    panel.Controls[j * 5 + 4].Text = Result[i].Age;
+                    j++;
+                }
+                page++;
+            }
+
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            int maleCount = 0;
+            int femaleCount = 0;
+            foreach (COVIDDataPoint point in Result)
+            {
+                if (point.Sex == "male")
+                    maleCount++;
+                else if (point.Sex == "female")
+                    femaleCount++;
+            }
+            string answer = (maleCount > femaleCount) ? "Men: " + maleCount.ToString() : "Women: " + femaleCount.ToString();
+            label10.Text = answer;
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            String type = comboBox2.Text;
+            decimal top = numericUpDown1.Value;
+            string Answer = "";
+            string countries = Parent.countries.Replace(" ", "");
+            /*
+            if (type == "Month")
+            {
+                List<DateDataPoint> DateList = new List<DateDataPoint>();
+                DateDataPoint max = new DateDataPoint();
+                DateList = Parent.D;
+                max.Count = 0;
+
+                if(top < DateList.Count)
+                {
+                    for (int i = 0; i < top; i++)
+                    {
+                        foreach (DateDataPoint point in DateList)
+                        {
+                            if (max.Count < point.Count)
+                                max = point;
+                        }
+                        Answer += (i + 1).ToString() + ". " + max.Date[3].ToString() + max.Date[4].ToString() + '\n';
+                        DateList.Remove(max);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < DateList.Count; i++)
+                    {
+                        foreach (DateDataPoint point in DateList)
+                        {
+                            if (max.Count < point.Count)
+                                max = point;
+                        }
+                        Answer += (i + 1).ToString() + ". " + max.Date[3].ToString() + max.Date[4].ToString() + '\n';
+                        DateList.Remove(max);
+                    }
+                    for (int i = DateList.Count; i < top; i++)
+                    {
+                        Answer += ((i + 1).ToString() + ". " + "\n ");
+                    }
+                }
+            }
+            else if (type == "Country")
+            {
+                List<CountryDataPoint> CountryList = new List<CountryDataPoint>();
+                CountryDataPoint max = new CountryDataPoint();
+                CountryList = Parent.C;
+                max.Count = 0;
+                if (top < CountryList.Count)
+                {
+                    for (int i = 0; i < top; i++)
+                    {
+                        foreach (CountryDataPoint point in CountryList)
+                        {
+                            if (max.Count < point.Count)
+                                max = point;
+                        }
+                        Answer += (i + 1).ToString() + ". " + max.Country + '\n';
+                        CountryList.Remove(max);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < CountryList.Count; i++)
+                    {
+                        foreach (CountryDataPoint point in CountryList)
+                        {
+                            if (max.Count < point.Count)
+                                max = point;
+                        }
+                        Answer += (i + 1).ToString() + ". " + max.Country + '\n';
+                        CountryList.Remove(max);
+                    }
+                    for (int i = CountryList.Count; i < top; i++)
+                    {
+                        Answer += ((i + 1).ToString() + ". " + "\n ");
+                    }
+                }
+            }
+            else if (type == "Age Group")
+            {
+                List<AgeDataPoint> AgeList = new List<AgeDataPoint>();
+                AgeDataPoint max = new AgeDataPoint();
+                AgeList = Parent.A;
+                max.Count = 0;
+                if (top < AgeList.Count)
+                {
+                    for (int i = 0; i < top; i++)
+                    {
+                        foreach (AgeDataPoint point in AgeList)
+                        {
+                            if (max.Count < point.Count)
+                                max = point;
+                        }
+                        Answer += (i + 1).ToString() + ". " + max.Age + '\n';
+                        AgeList.Remove(max);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < AgeList.Count; i++)
+                    {
+                        foreach (AgeDataPoint point in AgeList)
+                        {
+                            if (max.Count < point.Count)
+                                max = point;
+                        }
+                        Answer += (i + 1).ToString() + ". " + max.Age + '\n';
+                        AgeList.Remove(max);
+                    }
+                    for (int i = AgeList.Count; i < top; i++)
+                    {
+                        Answer += ((i + 1).ToString() + ". " + "\n ");
+                    }
+                }
+            }*/
+            List<String> typeIN = new List<String>();
+            foreach (COVIDDataPoint point in Result)
+            {
+                if (type == "Month" && dateCheck(point.Date))
+                {
+                    typeIN.Add(point.Date[3].ToString() + point.Date[4].ToString());
+                }
+                else if (type == "Country" && countries.Contains(point.Country))
+                {
+                    typeIN.Add(point.Country);
+                }
+                else if (type == "Age Group" && Parent.ageCheck(point.Age))
+                {
+                    typeIN.Add(point.Age);
+                }
+            }
+            List<string> Unique = typeIN.Distinct().ToList();
+
+            List<int> UniqueVals = new List<int>();
+            int count;
+            for (int i = 0; i < Unique.Count; i++)
+            {
+                count = 0;
+                for (int j = 0; j < typeIN.Count; j++)
+                {
+                    if (Unique[i] == typeIN[j])
+                        count++;
+                }
+                UniqueVals.Add(count);
+            }
+            int maxa = 0;
+            int pos = 0;
+            if (top < UniqueVals.Count)
+            {
+                for (int i = 0; i < top; i++)
+                {
+                    maxa = 0;
+                    pos = 0;
+                    for (int j = 0; j < UniqueVals.Count; j++)
+                    {
+                        if (maxa < UniqueVals[j])
+                        {
+                            pos = j;
+                            maxa = UniqueVals[j];
+                        }
+                    }
+                    Answer += ((i + 1).ToString() + ". " + Unique[pos] + "\n ");
+                    UniqueVals.RemoveAt(pos);
+                    Unique.RemoveAt(pos);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < UniqueVals.Count; i++)
+                {
+                    maxa = 0;
+                    pos = 0;
+                    for (int j = 0; j < UniqueVals.Count; j++)
+                    {
+                        if (maxa < UniqueVals[j])
+                        {
+                            pos = j;
+                            maxa = UniqueVals[j];
+                        }
+                    }
+                    Answer += ((i + 1).ToString() + ". " + Unique[pos] + "\n ");
+                    UniqueVals.RemoveAt(pos);
+                    Unique.RemoveAt(pos);
+                }
+                for (int i = UniqueVals.Count; i < top; i++)
+                {
+                    Answer += ((i + 1).ToString() + ". " + "\n ");
+                }
+            }
+
+            System.Threading.Thread.Sleep(Result.Count / 10);
+            textBox8.Text = Answer;
         }
     }
 }

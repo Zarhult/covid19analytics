@@ -32,10 +32,20 @@ namespace Client
         public ShowSpread SpreadVisualize;
         public Import ImportWindow;
         public List<COVIDDataPoint> Result;
+        public List<CountryDataPoint> C;
+        public List<GenderDataPoint> S;
+        public List<AgeDataPoint> A;
+        public List<DateDataPoint> D;
+        public int TotalPointNum = 13479; // num of points (IDs) initially (better to query this from the server...)
+
         public Form1()
         {
+
             InitializeComponent();
         }
+
+
+
 
         public bool dateCheck(String date)
         {
@@ -103,7 +113,6 @@ namespace Client
                 {
                    IP = address.ToString();
                 }
-
             }
             client = new TcpClient();
             IPEndPoint IP_End = new IPEndPoint(IPAddress.Parse(IP), int.Parse(textBox1.Text)); //Use the same port as the server
@@ -157,6 +166,7 @@ namespace Client
                             SearchResults.Add(point);
                         }
                         Result = SearchResults;
+                        DispersePoints();
                         recieve = "There are " + numOfResults.ToString() + " Results for the specific Search";
                         this.textBox2.Invoke(new MethodInvoker(delegate () { textBox2.AppendText("Server Responds: " + recieve + "\n"); }));
                         // PROBLEM: "country" is missing from most of the data in Result
@@ -188,6 +198,93 @@ namespace Client
             backgroundWorker2.CancelAsync();
         }
 
+        public void DispersePoints()
+        {
+            List<String> Date = new List<String>();
+            List<String> Country = new List<String>();
+            List<String> Age = new List<String>();
+            List<String> Gender = new List<String>();
+            foreach (COVIDDataPoint point in Result)
+            {
+                Date.Add(point.Date);
+                Country.Add(point.Country);
+                Age.Add(point.Age);
+                Gender.Add(point.Sex);
+            }
+            //Initialize Date Class
+            List<string> Unique = Date.Distinct().ToList();
+            List<DateDataPoint> Dates = new List<DateDataPoint>();
+            DateDataPoint Datest = new DateDataPoint();
+            int count;
+            for (int i = 0; i < Unique.Count; i++)
+            {
+                count = 0;
+                for (int j = 0; j < Date.Count; j++)
+                {
+                    if (Date[i] == Date[j])
+                        count++;
+                }
+                Datest.ID = i;
+                Datest.Date = Unique[i];
+                Datest.Count = count;
+                Dates.Add(Datest);
+            }
+            //Initialize Country Class
+            Unique = Country.Distinct().ToList();
+            List<CountryDataPoint> Countries = new List<CountryDataPoint>();
+            for (int i = 0; i < Unique.Count; i++)
+            {
+                CountryDataPoint Countrys = new CountryDataPoint();
+                count = 0;
+                for (int j = 0; j < Country.Count; j++)
+                {
+                    if (Country[i] == Country[j])
+                        count++;
+                }
+                Countrys.ID = i;
+                Countrys.Country = Unique[i];
+                Countrys.Count = count;
+                Countries.Add(Countrys);
+            }
+            //Initialize Age Class
+            Unique = Age.Distinct().ToList();
+            List<AgeDataPoint> Ages = new List<AgeDataPoint>();
+            AgeDataPoint Ager = new AgeDataPoint();
+            for (int i = 0; i < Unique.Count; i++)
+            {
+                count = 0;
+                for (int j = 0; j < Age.Count; j++)
+                {
+                    if (Age[i] == Age[j])
+                        count++;
+                }
+                Ager.ID = i;
+                Ager.Age = Unique[i];
+                Ager.Count = count;
+                Ages.Add(Ager);
+            }
+            //Initialize Gender Class
+            Unique = Gender.Distinct().ToList();
+            List<GenderDataPoint> Sex = new List<GenderDataPoint>();
+            GenderDataPoint Sexes = new GenderDataPoint();
+            for (int i = 0; i < Unique.Count; i++)
+            {
+                count = 0;
+                for (int j = 0; j < Gender.Count; j++)
+                {
+                    if (Gender[i] == Gender[j])
+                        count++;
+                }
+                Sexes.ID = i;
+                Sexes.Sex = Unique[i];
+                Sexes.Count = count;
+                Sex.Add(Sexes);
+            }
+            C = Countries;
+            A = Ages;
+            D = Dates;
+            S = Sex;
+        }
         private void button2_Click(object sender, EventArgs e) //Send Information LOOK HERE
         {
             text_to_send = "";
@@ -295,5 +392,32 @@ namespace Client
         public String Country = "";
         public String Sex = "";
         public String Age = "";
+    }
+
+    public class CountryDataPoint
+    {
+        public int ID = 0;
+        public int Count = 0;
+        public String Country = "";
+    }
+    public class DateDataPoint
+    {
+        public int ID = 0;
+        public int Count = 0;
+        public String Date = "";
+    }
+
+    public class AgeDataPoint
+    {
+        public int ID = 0;
+        public int Count = 0;
+        public String Age = "";
+    }
+
+    public class GenderDataPoint
+    {
+        public int ID = 0;
+        public int Count = 0;
+        public String Sex = "";
     }
 }
